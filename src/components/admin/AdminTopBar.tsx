@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Bell, Command, Building2, Users, ArrowRight } from 'lucide-react';
-import { cn } from '../../utils/twMerge';
 import { StatusBadge } from './StatusBadge';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { listVenues } from '../../api/adapters/venues';

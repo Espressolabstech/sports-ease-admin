@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { StatusBadge } from '../../components/admin/StatusBadge';
 import { Button } from '../../components/ui/button';
 import { Skeleton } from '../../components/ui/skeleton';
 import { CheckCircle } from 'lucide-react';

@@ -43,7 +43,7 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
     const [active, setActive] = useState(true);
     const [tierGrant, setTierGrant] = useState<string>('');
 
-    const { data: packages, isLoading } = useQuery({
+    const { data: packages, isLoading } = useQuery<any[]>({
         queryKey: ['credit-packages', venueId],
         queryFn: async () => {
             // const { data } = await supabase
@@ -52,11 +52,15 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
             //     .eq('venue_id', venueId)
             //     .order('created_at', { ascending: false });
             // return data || [];
+            return [];
         },
     });
 
     // Wallet liability
-    const { data: walletLiability } = useQuery({
+    const { data: walletLiability } = useQuery<{
+        total: number;
+        top5: { player_id: string; credit_balance: number }[];
+    } | null>({
         queryKey: ['wallet-liability', venueId],
         queryFn: async () => {
             // const { data } = await supabase
@@ -70,6 +74,7 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
             // );
             // const top5 = (data || []).slice(0, 5);
             // return { total, top5, playerCount: (data || []).length };
+            return null;
         },
     });
 
@@ -100,14 +105,6 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
                 throw new Error(
                     'Credit value must be greater than cash amount',
                 );
-            const payload = {
-                name,
-                cash_amount: cashAmount,
-                credit_value: creditValue,
-                description,
-                active,
-                tier_grant: tierGrant || null,
-            };
             if (editId) {
                 // await supabase
                 //     .from('venue_credit_packages')
@@ -132,7 +129,7 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
     });
 
     const deactivateMutation = useMutation({
-        mutationFn: async (pkgId: string) => {
+        mutationFn: async (_pkgId: string) => {
             // await supabase
             //     .from('venue_credit_packages')
             //     .update({ active: false })

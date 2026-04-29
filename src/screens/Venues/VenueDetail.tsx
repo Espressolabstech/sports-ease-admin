@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Skeleton } from '../../components/ui/skeleton';
 import { ExternalLink, MapPin, ShieldCheck, ShieldOff } from 'lucide-react';
@@ -44,7 +44,6 @@ const TABS = [
 const VenueDetails = () => {
     const { venueId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
-    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { isSuperAdmin } = useAdminAuth();
 

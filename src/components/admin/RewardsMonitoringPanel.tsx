@@ -10,10 +10,10 @@ export function RewardsMonitoringPanel() {
         queryKey: ['admin-rewards-monitoring'],
         refetchInterval: 30000,
         queryFn: () => getDashboard().then((res) => ({
-            activeHolds: res.dashboard.rewardsMonitoring.activeHolds,
-            failedVoids24h: res.dashboard.rewardsMonitoring.failedAuthVoids24h,
-            failedRefunds: res.dashboard.rewardsMonitoring.failedRefundsPending,
-            totalWalletLiability: res.dashboard.rewardsMonitoring.totalWalletLiability,
+            activeHolds: res.rewardsMonitoring.activeHolds,
+            failedVoids24h: res.rewardsMonitoring.failedAuthVoids24h,
+            failedRefunds: res.rewardsMonitoring.failedRefundsPending,
+            totalWalletLiability: res.rewardsMonitoring.totalWalletLiability,
         })),
     });
 

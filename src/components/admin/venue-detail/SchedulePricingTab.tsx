@@ -2,12 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { StatusBadge } from '../../admin/StatusBadge';
 import { Skeleton } from '../../ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
-import { cn } from '../../../utils/twMerge';
 import { listCourts } from '../../../api/adapters/courts';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const DURATIONS = [30, 60, 90, 120];
 
 interface Props {
     venueId: string;

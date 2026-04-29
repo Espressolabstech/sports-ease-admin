@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Lock, Settings, Shield, Check } from 'lucide-react';
 import { getTierBenefits, updateTierBenefit, getPlatformStats } from '../../api/adapters/settings';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
-import { cn } from '../../utils/twMerge';
+
 
 export default function AdminSettingsPage() {
     const { isSuperAdmin } = useAdminAuth();

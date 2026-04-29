@@ -15,6 +15,13 @@ export const verifyAdminOtp = (phone: string, otp: string) =>
         data: { phone, otp },
     });
 
+export const loginAdminWithPassword = (email: string, password: string) =>
+    apiClient<{ token: string; admin: { id: string; email: string; name: string; role: string } }>({
+        url: endpoints.loginWithPassword,
+        method: 'POST',
+        data: { email, password },
+    });
+
 export const getAdminMe = () =>
     apiClient<{ admin: { id: string; name: string; phone: string; role: string; createdAt: string } }>({
         url: endpoints.me,

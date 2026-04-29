@@ -4,39 +4,24 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { loginAdmin, verifyAdminOtp } from '../../api/adapters/auth';
+import { loginAdminWithPassword } from '../../api/adapters/auth';
 import { setToken } from '../../utils/cookies.helpers';
 
 const Login = () => {
     const navigate = useNavigate();
-    const [phone, setPhone] = useState('');
-    const [otp, setOtp] = useState('');
-    const [step, setStep] = useState<'phone' | 'otp'>('phone');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSendOtp = async () => {
-        if (!phone.trim()) return;
+    const handleLogin = async () => {
+        if (!email.trim() || !password.trim()) return;
         setLoading(true);
         try {
-            await loginAdmin(phone.trim());
-            setStep('otp');
-            toast.success('OTP sent to your phone');
-        } catch (err: any) {
-            toast.error(err.message || 'Failed to send OTP');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleVerifyOtp = async () => {
-        if (!otp.trim()) return;
-        setLoading(true);
-        try {
-            const res = await verifyAdminOtp(phone.trim(), otp.trim());
+            const res = await loginAdminWithPassword(email.trim(), password.trim());
             setToken(res.token);
             navigate('/admin/dashboard', { replace: true });
         } catch (err: any) {
-            toast.error(err.message || 'Invalid OTP');
+            toast.error(err.message || 'Invalid email or password');
         } finally {
             setLoading(false);
         }
@@ -53,58 +38,34 @@ const Login = () => {
                         BookEase Platform Admin
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        {step === 'phone' ? 'Enter your phone number to sign in' : `Enter the OTP sent to ${phone}`}
+                        Sign in with your admin email
                     </p>
                 </div>
 
                 <div className="space-y-3">
-                    {step === 'phone' ? (
-                        <>
-                            <Input
-                                type="tel"
-                                placeholder="+971 50 000 0000"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSendOtp()}
-                                autoFocus
-                            />
-                            <Button
-                                onClick={handleSendOtp}
-                                disabled={loading || !phone.trim()}
-                                className="w-full bg-[hsl(var(--admin-navy))] text-[hsl(var(--admin-navy-foreground))] hover:bg-[hsl(var(--admin-navy))]/90"
-                            >
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Send OTP
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Input
-                                type="text"
-                                inputMode="numeric"
-                                placeholder="Enter 6-digit OTP"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
-                                maxLength={6}
-                                autoFocus
-                            />
-                            <Button
-                                onClick={handleVerifyOtp}
-                                disabled={loading || !otp.trim()}
-                                className="w-full bg-[hsl(var(--admin-navy))] text-[hsl(var(--admin-navy-foreground))] hover:bg-[hsl(var(--admin-navy))]/90"
-                            >
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Verify OTP
-                            </Button>
-                            <button
-                                onClick={() => { setStep('phone'); setOtp(''); }}
-                                className="w-full text-sm text-muted-foreground hover:text-foreground"
-                            >
-                                ← Change phone number
-                            </button>
-                        </>
-                    )}
+                    <Input
+                        type="email"
+                        placeholder="admin@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                        autoFocus
+                    />
+                    <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                    />
+                    <Button
+                        onClick={handleLogin}
+                        disabled={loading || !email.trim() || !password.trim()}
+                        className="w-full bg-[hsl(var(--admin-navy))] text-[hsl(var(--admin-navy-foreground))] hover:bg-[hsl(var(--admin-navy))]/90"
+                    >
+                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Sign In
+                    </Button>
                 </div>
             </div>
         </div>

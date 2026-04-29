@@ -2,6 +2,7 @@ export const endpoints = {
     // Auth
     login: '/admin/login',
     verifyOtp: '/admin/verify-otp',
+    loginWithPassword: '/admin/login-password',
     me: '/admin/me',
 
     // Dashboard

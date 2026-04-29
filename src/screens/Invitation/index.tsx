@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Copy, Download, Eye, RefreshCw } from 'lucide-react';
+import { Ban, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Copy, Download } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Input } from '../../components/ui/input';
@@ -23,7 +23,7 @@ const Invitation = () => {
     const [expiresInDays, setExpiresInDays] = useState('7');
     const [generatedToken, setGeneratedToken] = useState('');
 
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, _setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [page, setPage] = useState(1);
     const [revokeId, setRevokeId] = useState<string | null>(null);

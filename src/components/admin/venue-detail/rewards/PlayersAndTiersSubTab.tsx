@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Skeleton } from '../../../ui/skeleton';
@@ -68,7 +68,7 @@ export default function PlayersAndTiersSubTab({ venueId }: Props) {
     const [overrideExpiry, setOverrideExpiry] = useState('next_boundary');
 
     // Fetch players with tiers at this venue
-    const { data: players, isLoading } = useQuery({
+    const { data: players, isLoading } = useQuery<any[]>({
         queryKey: ['rewards-players', venueId, tierFilter],
         queryFn: async () => {
             // let query = supabase
@@ -81,11 +81,12 @@ export default function PlayersAndTiersSubTab({ venueId }: Props) {
             // const { data, error } = await query;
             // if (error) throw error;
             // return data || [];
+            return [];
         },
     });
 
     // Fetch tier config for progress bars
-    const { data: tierConfig } = useQuery({
+    const { data: tierConfig } = useQuery<any[]>({
         queryKey: ['venue-tier-config', venueId],
         queryFn: async () => {
             // const { data } = await supabase
@@ -93,15 +94,16 @@ export default function PlayersAndTiersSubTab({ venueId }: Props) {
             //     .select('*')
             //     .eq('venue_id', venueId);
             // return data || [];
+            return [];
         },
     });
 
     // Fetch feature usage for selected player
-    const { data: featureUsage } = useQuery({
+    const { data: featureUsage } = useQuery<{ holdCount: number; otcCount: number } | null>({
         queryKey: ['player-feature-usage', selectedPlayerId, venueId],
         enabled: !!selectedPlayerId,
         queryFn: async () => {
-            const monthYear = format(new Date(), 'yyyy-MM');
+            // const monthYear = format(new Date(), 'yyyy-MM');
             // const { data } = await supabase
             //     .from('feature_usage_log')
             //     .select('*')
@@ -115,11 +117,12 @@ export default function PlayersAndTiersSubTab({ venueId }: Props) {
             //     (d) => d.feature_type === 'otc',
             // ).length;
             // return { holdCount, otcCount };
+            return null;
         },
     });
 
     // Fetch tier override for selected player
-    const { data: existingOverride } = useQuery({
+    const { data: existingOverride } = useQuery<{ override_tier: string; reason: string; expiry_type: string } | null>({
         queryKey: ['tier-override', selectedPlayerId, venueId],
         enabled: !!selectedPlayerId,
         queryFn: async () => {
@@ -131,6 +134,7 @@ export default function PlayersAndTiersSubTab({ venueId }: Props) {
             //     .order('created_at', { ascending: false })
             //     .limit(1);
             // return data && data.length > 0 ? data[0] : null;
+            return null;
         },
     });
 

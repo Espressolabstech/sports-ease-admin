@@ -25,19 +25,15 @@ interface Props {
 export default function TierConfigSubTab({ venueId }: Props) {
     const queryClient = useQueryClient();
 
-    const { data: configs, isLoading } = useQuery({
+    const { data: configs, isLoading } = useQuery<any[]>({
         queryKey: ['tier-config', venueId],
-        queryFn: async () => {
-         
-        },
+        queryFn: async () => [],
     });
 
     // Fetch current player counts for preview
-    const { data: playerTiers } = useQuery({
+    const { data: playerTiers } = useQuery<any[]>({
         queryKey: ['tier-config-preview-players', venueId],
-        queryFn: async () => {
-            
-        },
+        queryFn: async () => [],
     });
 
     const proConfig = configs?.find((c) => c.tier_name === 'pro');

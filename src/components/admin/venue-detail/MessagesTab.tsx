@@ -5,7 +5,7 @@ interface Props {
     venueName: string;
 }
 
-export default function VenueMessagesTab({ venueId, venueName }: Props) {
+export default function VenueMessagesTab({ venueId: _venueId, venueName }: Props) {
     return (
         <div className="flex flex-col items-center justify-center rounded-xl bg-card py-20 shadow-sm">
             <MessageSquare className="h-12 w-12 text-muted-foreground/30" />

@@ -37,7 +37,7 @@ function entryStatus(type: string): { label: string; cls: string } {
     }
 }
 
-export default function CashLedgerTab({ isManager }: Props) {
+export default function CashLedgerTab({ isManager: _isManager }: Props) {
     const [page, setPage] = useState(1);
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');

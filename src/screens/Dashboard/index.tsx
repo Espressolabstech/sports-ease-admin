@@ -118,7 +118,7 @@ const Dashboard = () => {
                                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                                 <Tooltip
                                     contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', fontSize: 12 }}
-                                    formatter={(value: number) => [`${value} bookings`, '']}
+                                    formatter={(value) => [`${value ?? 0} bookings`, '']}
                                 />
                                 <Area type="monotone" dataKey="bookings" stroke="hsl(222, 47%, 11%)" fill="hsl(222, 47%, 11%)" fillOpacity={0.15} strokeWidth={2} />
                             </AreaChart>
@@ -142,7 +142,7 @@ const Dashboard = () => {
                                     <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                                     <Tooltip
                                         contentStyle={{ borderRadius: 8, border: '1px solid hsl(var(--border))', fontSize: 12 }}
-                                        formatter={(value: number) => [`INR ${value.toLocaleString()}`, 'Revenue']}
+                                        formatter={(value) => [`INR ${Number(value ?? 0).toLocaleString()}`, 'Revenue']}
                                     />
                                     <Bar dataKey="revenue" fill="hsl(84, 81%, 44%)" radius={[0, 4, 4, 0]} />
                                 </BarChart>

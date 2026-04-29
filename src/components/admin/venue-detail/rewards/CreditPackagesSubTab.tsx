@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import { Skeleton } from '../../../ui/skeleton';
 import { Button } from '../../../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../ui/card';
-import { Table } from 'lucide-react';
 import {
+    Table,
     TableBody,
     TableCell,
     TableHead,
@@ -23,6 +23,7 @@ import { Label } from '../../../ui/label';
 import { Input } from '../../../ui/input';
 import { Textarea } from '../../../ui/textarea';
 import { Switch } from '../../../ui/switch';
+import { Badge } from '../../../ui/badge';
 
 interface Props {
     venueId: string;
@@ -41,15 +42,18 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
     const [active, setActive] = useState(true);
     const [tierGrant, setTierGrant] = useState<string>('');
 
-    const { data: packages, isLoading } = useQuery({
+    const { data: packages, isLoading } = useQuery<any[]>({
         queryKey: ['credit-packages', venueId],
-        queryFn: async () => {},
+        queryFn: async () => [],
     });
 
     // Wallet liability
-    const { data: walletLiability } = useQuery({
+    const { data: walletLiability } = useQuery<{
+        total: number;
+        top5: { player_id: string; credit_balance: number }[];
+    } | null>({
         queryKey: ['wallet-liability', venueId],
-        queryFn: async () => {},
+        queryFn: async () => null,
     });
 
     const resetForm = () => {
@@ -79,14 +83,6 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
                 throw new Error(
                     'Credit value must be greater than cash amount',
                 );
-            const payload = {
-                name,
-                cash_amount: cashAmount,
-                credit_value: creditValue,
-                description,
-                active,
-                tier_grant: tierGrant || null,
-            };
             if (editId) {
             } else {
             }
@@ -103,7 +99,7 @@ export default function CreditPackagesSubTab({ venueId }: Props) {
     });
 
     const deactivateMutation = useMutation({
-        mutationFn: async (pkgId: string) => {},
+        mutationFn: async (_pkgId: string) => {},
         onSuccess: () => {
             toast.success('Package deactivated.');
             queryClient.invalidateQueries({

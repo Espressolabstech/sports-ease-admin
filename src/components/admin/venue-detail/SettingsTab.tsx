@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { toast } from 'sonner';
 import { Lock, Check } from 'lucide-react';
@@ -47,7 +46,7 @@ function SettingsForm({ venueId, venue }: { venueId: string; venue: any }) {
 
     const debouncedCommission = useCallback(
         (() => {
-            let timer: NodeJS.Timeout;
+            let timer: ReturnType<typeof setTimeout>;
             return (value: string) => {
                 clearTimeout(timer);
                 if (!value) return;

@@ -26,7 +26,7 @@ function txnStatus(type: string, source: string): { label: string; cls: string }
     }
 }
 
-export default function WalletLedgerTab({ isManager }: Props) {
+export default function WalletLedgerTab({ isManager: _isManager }: Props) {
     const [page, setPage] = useState(1);
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');

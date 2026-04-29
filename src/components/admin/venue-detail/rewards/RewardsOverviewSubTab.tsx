@@ -11,7 +11,7 @@ import {
     TableRow,
 } from '../../../ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { differenceInDays, format } from 'date-fns';
+import { format } from 'date-fns';
 
 interface Props {
     venueId: string;
@@ -37,52 +37,55 @@ const TIER_LABELS: Record<string, string> = {
 
 export default function RewardsOverviewSubTab({ venueId }: Props) {
     // Tier distribution
-    const { data: tierData, isLoading: tiersLoading } = useQuery({
+    const { data: tierData, isLoading: tiersLoading } = useQuery<{
+        total: number;
+        counts: { club: number; pro: number; elite: number };
+    } | null>({
         queryKey: ['rewards-tier-distribution', venueId],
-        queryFn: async () => {
-            
-        },
+        queryFn: async () => null,
     });
 
     // Hold usage this month
-    const { data: holdStats } = useQuery({
+    const { data: holdStats } = useQuery<{
+        placed: number;
+        confirmed: number;
+        expired: number;
+        conversionRate: string;
+    } | null>({
         queryKey: ['rewards-hold-stats', venueId],
-        queryFn: async () => {
-            const startOfMonth = new Date();
-            startOfMonth.setDate(1);
-            startOfMonth.setHours(0, 0, 0, 0);
-            const monthYear = format(startOfMonth, 'yyyy-MM');
-
-            
-        },
+        queryFn: async () => null,
     });
 
     // OTC usage this month
-    const { data: otcStats } = useQuery({
+    const { data: otcStats } = useQuery<{
+        activations: number;
+        filled: number;
+        autoDeactivated: number;
+        fillRate: string;
+    } | null>({
         queryKey: ['rewards-otc-stats', venueId],
-        queryFn: async () => {
-           
-        },
+        queryFn: async () => null,
     });
 
     // Wallet revenue
-    const { data: walletStats } = useQuery({
+    const { data: walletStats } = useQuery<{
+        monthlyRevenue: number;
+        outstandingBalance: number;
+    } | null>({
         queryKey: ['rewards-wallet-stats', venueId],
-        queryFn: async () => {
-            
-        },
+        queryFn: async () => null,
     });
 
     // Upcoming recalculations (next 30 days)
-    const { data: recalcData } = useQuery({
+    const { data: recalcData } = useQuery<Array<{
+        player_id: string;
+        current_tier: string;
+        next_recalculation_at: string;
+        daysRemaining: number;
+        projection?: { confidence: string };
+    }> | null>({
         queryKey: ['rewards-upcoming-recalc', venueId],
-        queryFn: async () => {
-            const today = new Date();
-            const thirtyDaysLater = new Date(
-                today.getTime() + 30 * 24 * 60 * 60 * 1000,
-            );
-           
-        },
+        queryFn: async () => null,
     });
 
     const donutData = tierData
