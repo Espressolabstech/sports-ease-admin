@@ -6,6 +6,7 @@ import Venues from '../screens/Venues/index';
 import VenueDetail from '../screens/Venues/VenueDetail';
 import VenuePending from '../screens/Venues/VenuePending';
 import VenueReview from '../screens/Venues/VenueReview';
+import OnboardVenue from '../screens/Venues/OnboardVenue';
 import Bookings from '../screens/Bookings/index';
 import Players from '../screens/Players/index';
 import Courts from '../screens/Courts/index';
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
             { path: 'dashboard', element: <Dashboard /> },
             { path: 'venues', element: <Venues /> },
             { path: 'venues/pending', element: <VenuePending /> },
+            { path: 'venues/onboard', element: <OnboardVenue /> },
             { path: 'venues/:venueId/review', element: <VenueReview /> },
             { path: 'venues/:venueId', element: <VenueDetail /> },
             { path: 'bookings', element: <Bookings /> },

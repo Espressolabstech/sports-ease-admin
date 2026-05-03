@@ -44,6 +44,9 @@ export const endpoints = {
     invitations: '/admin/invitations',
     invitationRevoke: (id: string) => `/admin/invitations/${id}/revoke`,
 
+    // Onboarding
+    onboardGenerateMagicLink: '/onboard/generate-invite-magic-link',
+
     // Settings
     settingsTiers: '/admin/settings/tiers',
     settingsTier: (tier: string) => `/admin/settings/tiers/${tier}`,

@@ -5,17 +5,54 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Skeleton } from '../../components/ui/skeleton';
 import { toast } from 'sonner';
-import { Users, Search, Eye, Ban, ShieldCheck, ChevronLeft, ChevronRight, Download } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../../components/ui/sheet';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import {
+    Users,
+    Search,
+    Eye,
+    Ban,
+    ShieldCheck,
+    ChevronLeft,
+    ChevronRight,
+    Download,
+} from 'lucide-react';
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '../../components/ui/sheet';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '../../components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '../../components/ui/select';
 import { Textarea } from '../../components/ui/textarea';
 import { cn } from '../../utils/twMerge';
-import { listPlayers, getPlayer, updatePlayerStatus } from '../../api/adapters/players';
+import {
+    listPlayers,
+    getPlayer,
+    updatePlayerStatus,
+} from '../../api/adapters/players';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 
 const PAGE_SIZE = 25;
-const BAN_REASONS = ['Fraudulent Activity', 'Payment Fraud', 'Repeated No-Shows', 'Abusive Behaviour', 'Other'];
+const BAN_REASONS = [
+    'Fraudulent Activity',
+    'Payment Fraud',
+    'Repeated No-Shows',
+    'Abusive Behaviour',
+    'Other',
+];
 
 export default function AdminPlayersPage() {
     const { isSuperAdmin } = useAdminAuth();
@@ -33,7 +70,10 @@ export default function AdminPlayersPage() {
         queryFn: () =>
             listPlayers({
                 search: searchQuery || undefined,
-                status: statusFilter === 'all' ? undefined : statusFilter.toUpperCase(),
+                status:
+                    statusFilter === 'all'
+                        ? undefined
+                        : statusFilter.toUpperCase(),
                 page,
                 limit: PAGE_SIZE,
             }),
@@ -51,7 +91,8 @@ export default function AdminPlayersPage() {
     });
 
     const banMutation = useMutation({
-        mutationFn: () => updatePlayerStatus(banPlayer.id, 'BANNED'),
+        mutationFn: () =>
+            updatePlayerStatus(banPlayer.id, 'BANNED', banReason, banNotes),
         onSuccess: () => {
             toast.success(`${banPlayer.name} has been banned.`);
             setBanPlayer(null);
@@ -74,7 +115,14 @@ export default function AdminPlayersPage() {
     const exportCSV = () => {
         if (!players.length) return;
         const csv = [['Name', 'Phone', 'Status', 'Registered']]
-            .concat(players.map((p: any) => [p.name, p.phone || '', p.status, new Date(p.createdAt).toLocaleDateString()]))
+            .concat(
+                players.map((p: any) => [
+                    p.name,
+                    p.phone || '',
+                    p.status,
+                    new Date(p.createdAt).toLocaleDateString(),
+                ]),
+            )
             .map((r) => r.map((v: any) => `"${v}"`).join(','))
             .join('\n');
         const a = document.createElement('a');
@@ -92,7 +140,10 @@ export default function AdminPlayersPage() {
                         <Input
                             placeholder="Search players..."
                             value={searchQuery}
-                            onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setPage(1);
+                            }}
                             className="pl-9"
                         />
                     </div>
@@ -100,10 +151,15 @@ export default function AdminPlayersPage() {
                         {['all', 'active', 'banned'].map((s) => (
                             <button
                                 key={s}
-                                onClick={() => { setStatusFilter(s); setPage(1); }}
+                                onClick={() => {
+                                    setStatusFilter(s);
+                                    setPage(1);
+                                }}
                                 className={cn(
                                     'rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors',
-                                    statusFilter === s ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground',
+                                    statusFilter === s
+                                        ? 'bg-card text-foreground shadow-sm'
+                                        : 'text-muted-foreground',
                                 )}
                             >
                                 {s === 'all' ? 'All' : s}
@@ -119,12 +175,16 @@ export default function AdminPlayersPage() {
             <div className="rounded-xl bg-card shadow-sm">
                 {isLoading ? (
                     <div className="space-y-3 p-6">
-                        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton key={i} className="h-12 w-full" />
+                        ))}
                     </div>
                 ) : players.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16">
                         <Users className="h-12 w-12 text-muted-foreground/30" />
-                        <p className="mt-4 text-sm font-medium text-muted-foreground">No players match your current filters.</p>
+                        <p className="mt-4 text-sm font-medium text-muted-foreground">
+                            No players match your current filters.
+                        </p>
                     </div>
                 ) : (
                     <>
@@ -132,39 +192,101 @@ export default function AdminPlayersPage() {
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-border text-left">
-                                        <th className="px-4 py-3 font-medium text-muted-foreground">Player Name</th>
-                                        <th className="px-4 py-3 font-medium text-muted-foreground">Phone</th>
-                                        <th className="px-4 py-3 font-medium text-muted-foreground">Tier</th>
-                                        <th className="px-4 py-3 font-medium text-muted-foreground">Registered</th>
-                                        <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
-                                        <th className="px-4 py-3 font-medium text-muted-foreground">Actions</th>
+                                        <th className="px-4 py-3 font-medium text-muted-foreground">
+                                            Player Name
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-muted-foreground">
+                                            Phone
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-muted-foreground">
+                                            Tier
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-muted-foreground">
+                                            Registered
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-muted-foreground">
+                                            Status
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-muted-foreground">
+                                            Actions
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {players.map((player: any) => {
-                                        const isBanned = player.status === 'BANNED';
+                                        const isBanned =
+                                            player.status === 'BANNED';
                                         return (
-                                            <tr key={player.id} className="border-b border-border last:border-0 hover:bg-muted/30">
-                                                <td className="px-4 py-3 font-medium">{player.name}</td>
-                                                <td className="px-4 py-3 text-muted-foreground">{player.phone || '—'}</td>
-                                                <td className="px-4 py-3 text-muted-foreground">{player.tier || '—'}</td>
-                                                <td className="px-4 py-3 text-muted-foreground">{new Date(player.createdAt).toLocaleDateString()}</td>
-                                                <td className="px-4 py-3"><StatusBadge status={player.status} /></td>
+                                            <tr
+                                                key={player.id}
+                                                className="border-b border-border last:border-0 hover:bg-muted/30"
+                                            >
+                                                <td className="px-4 py-3 font-medium">
+                                                    {player.name}
+                                                </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {player.phone || '—'}
+                                                </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {player.tier || '—'}
+                                                </td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {new Date(
+                                                        player.createdAt,
+                                                    ).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <StatusBadge
+                                                        status={player.status}
+                                                    />
+                                                </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex gap-1">
-                                                        <Button size="sm" variant="ghost" onClick={() => setViewPlayerId(player.id)} title="View">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                                setViewPlayerId(
+                                                                    player.id,
+                                                                )
+                                                            }
+                                                            title="View"
+                                                        >
                                                             <Eye className="h-4 w-4" />
                                                         </Button>
-                                                        {isSuperAdmin && !isBanned && (
-                                                            <Button size="sm" variant="ghost" onClick={() => setBanPlayer(player)} title="Ban">
-                                                                <Ban className="h-4 w-4 text-[hsl(var(--admin-status-red))]" />
-                                                            </Button>
-                                                        )}
-                                                        {isSuperAdmin && isBanned && (
-                                                            <Button size="sm" variant="ghost" onClick={() => unbanMutation.mutate(player)} disabled={unbanMutation.isPending} title="Unban">
-                                                                <ShieldCheck className="h-4 w-4 text-[hsl(var(--admin-status-lime))]" />
-                                                            </Button>
-                                                        )}
+                                                        {isSuperAdmin &&
+                                                            !isBanned && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={() =>
+                                                                        setBanPlayer(
+                                                                            player,
+                                                                        )
+                                                                    }
+                                                                    title="Ban"
+                                                                >
+                                                                    <Ban className="h-4 w-4 text-[hsl(var(--admin-status-red))]" />
+                                                                </Button>
+                                                            )}
+                                                        {isSuperAdmin &&
+                                                            isBanned && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={() =>
+                                                                        unbanMutation.mutate(
+                                                                            player,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        unbanMutation.isPending
+                                                                    }
+                                                                    title="Unban"
+                                                                >
+                                                                    <ShieldCheck className="h-4 w-4 text-[hsl(var(--admin-status-lime))]" />
+                                                                </Button>
+                                                            )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -175,13 +297,27 @@ export default function AdminPlayersPage() {
                         </div>
                         <div className="space-y-3 p-4 md:hidden">
                             {players.map((player: any) => (
-                                <div key={player.id} className="rounded-lg border border-border p-4 space-y-2">
+                                <div
+                                    key={player.id}
+                                    className="rounded-lg border border-border p-4 space-y-2"
+                                >
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium text-sm">{player.name}</span>
+                                        <span className="font-medium text-sm">
+                                            {player.name}
+                                        </span>
                                         <StatusBadge status={player.status} />
                                     </div>
-                                    <p className="text-xs text-muted-foreground">{player.phone || '—'}</p>
-                                    <Button size="sm" className="w-full" variant="outline" onClick={() => setViewPlayerId(player.id)}>
+                                    <p className="text-xs text-muted-foreground">
+                                        {player.phone || '—'}
+                                    </p>
+                                    <Button
+                                        size="sm"
+                                        className="w-full"
+                                        variant="outline"
+                                        onClick={() =>
+                                            setViewPlayerId(player.id)
+                                        }
+                                    >
                                         View Profile
                                     </Button>
                                 </div>
@@ -189,12 +325,24 @@ export default function AdminPlayersPage() {
                         </div>
                         {totalPages > 1 && (
                             <div className="flex items-center justify-between border-t border-border px-4 py-3">
-                                <p className="text-xs text-muted-foreground">Page {page} of {totalPages}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Page {page} of {totalPages}
+                                </p>
                                 <div className="flex gap-1">
-                                    <Button size="icon" variant="ghost" onClick={() => setPage(page - 1)} disabled={page === 1}>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => setPage(page - 1)}
+                                        disabled={page === 1}
+                                    >
                                         <ChevronLeft className="h-4 w-4" />
                                     </Button>
-                                    <Button size="icon" variant="ghost" onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => setPage(page + 1)}
+                                        disabled={page >= totalPages}
+                                    >
                                         <ChevronRight className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -204,42 +352,103 @@ export default function AdminPlayersPage() {
                 )}
             </div>
 
-            <Sheet open={!!viewPlayerId} onOpenChange={() => setViewPlayerId(null)}>
+            <Sheet
+                open={!!viewPlayerId}
+                onOpenChange={() => setViewPlayerId(null)}
+            >
                 <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-                    <SheetHeader><SheetTitle>Player Profile</SheetTitle></SheetHeader>
+                    <SheetHeader>
+                        <SheetTitle>Player Profile</SheetTitle>
+                    </SheetHeader>
                     {playerDetailData && (
                         <div className="mt-6 space-y-6">
                             <div className="flex items-center gap-4">
                                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-lg font-bold text-muted-foreground">
-                                    {playerDetailData.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                                    {playerDetailData.name
+                                        ?.split(' ')
+                                        .map((n: string) => n[0])
+                                        .join('')
+                                        .toUpperCase()
+                                        .slice(0, 2)}
                                 </div>
                                 <div>
-                                    <p className="font-semibold">{playerDetailData.name}</p>
-                                    <p className="text-sm text-muted-foreground">{playerDetailData.phone || '—'}</p>
+                                    <p className="font-semibold">
+                                        {playerDetailData.name}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {playerDetailData.phone || '—'}
+                                    </p>
                                 </div>
                             </div>
                             <div className="grid gap-3 grid-cols-2 text-sm">
-                                <div><p className="text-xs text-muted-foreground">Phone</p><p>{playerDetailData.phone || '—'}</p></div>
-                                <div><p className="text-xs text-muted-foreground">Registered</p><p>{new Date(playerDetailData.createdAt).toLocaleDateString()}</p></div>
-                                <div><p className="text-xs text-muted-foreground">Bookings</p><p>{playerDetailData.bookings?.length ?? 0}</p></div>
-                                <div><p className="text-xs text-muted-foreground">Status</p><StatusBadge status={playerDetailData.status} /></div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Phone
+                                    </p>
+                                    <p>{playerDetailData.phone || '—'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Registered
+                                    </p>
+                                    <p>
+                                        {new Date(
+                                            playerDetailData.createdAt,
+                                        ).toLocaleDateString()}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Bookings
+                                    </p>
+                                    <p>
+                                        {playerDetailData.bookings?.length ?? 0}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-muted-foreground">
+                                        Status
+                                    </p>
+                                    <StatusBadge
+                                        status={playerDetailData.status}
+                                    />
+                                </div>
                             </div>
                             {playerDetailData.bookings?.length > 0 && (
                                 <div>
-                                    <h3 className="text-sm font-semibold mb-3">Recent Bookings</h3>
+                                    <h3 className="text-sm font-semibold mb-3">
+                                        Recent Bookings
+                                    </h3>
                                     <div className="space-y-2">
-                                        {playerDetailData.bookings.slice(0, 5).map((b: any) => (
-                                            <div key={b.id} className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
-                                                <div>
-                                                    <p className="font-medium">{b.bookingDate || '—'}</p>
-                                                    <p className="text-xs text-muted-foreground">{b.venue?.name}</p>
+                                        {playerDetailData.bookings
+                                            .slice(0, 5)
+                                            .map((b: any) => (
+                                                <div
+                                                    key={b.id}
+                                                    className="flex items-center justify-between rounded-lg border border-border p-3 text-sm"
+                                                >
+                                                    <div>
+                                                        <p className="font-medium">
+                                                            {b.bookingDate ||
+                                                                '—'}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {b.venue?.name}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p>
+                                                            INR{' '}
+                                                            {b.finalAmount ||
+                                                                b.totalAmount ||
+                                                                0}
+                                                        </p>
+                                                        <StatusBadge
+                                                            status={b.status}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p>INR {b.finalAmount || b.totalAmount || 0}</p>
-                                                    <StatusBadge status={b.status} />
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))}
                                     </div>
                                 </div>
                             )}
@@ -252,27 +461,58 @@ export default function AdminPlayersPage() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Ban {banPlayer?.name}</DialogTitle>
-                        <DialogDescription>Banning this player will prevent them from making new bookings.</DialogDescription>
+                        <DialogDescription>
+                            Banning this player will prevent them from making
+                            new bookings.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium">Reason</label>
-                            <Select value={banReason} onValueChange={setBanReason}>
-                                <SelectTrigger><SelectValue placeholder="Select a reason" /></SelectTrigger>
+                            <label className="text-sm font-medium">
+                                Reason
+                            </label>
+                            <Select
+                                value={banReason}
+                                onValueChange={setBanReason}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a reason" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    {BAN_REASONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                                    {BAN_REASONS.map((r) => (
+                                        <SelectItem key={r} value={r}>
+                                            {r}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-sm font-medium">Notes (optional)</label>
-                            <Textarea value={banNotes} onChange={(e) => setBanNotes(e.target.value)} placeholder="Additional details..." />
+                            <label className="text-sm font-medium">
+                                Notes (optional)
+                            </label>
+                            <Textarea
+                                value={banNotes}
+                                onChange={(e) => setBanNotes(e.target.value)}
+                                placeholder="Additional details..."
+                            />
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setBanPlayer(null)}>Cancel</Button>
-                        <Button variant="destructive" onClick={() => banMutation.mutate()} disabled={!banReason || banMutation.isPending}>
-                            {banMutation.isPending ? 'Banning...' : 'Confirm Ban'}
+                        <Button
+                            variant="outline"
+                            onClick={() => setBanPlayer(null)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => banMutation.mutate()}
+                            disabled={!banReason || banMutation.isPending}
+                        >
+                            {banMutation.isPending
+                                ? 'Banning...'
+                                : 'Confirm Ban'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

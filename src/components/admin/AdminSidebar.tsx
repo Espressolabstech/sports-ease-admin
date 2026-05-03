@@ -59,6 +59,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
     const venueSubItems = [
         { to: '/admin/venues', label: 'All Venues' },
         { to: '/admin/venues/pending', label: 'Pending Review', badge: pendingCount },
+        { to: '/admin/venues/onboard', label: 'Onboard New' },
     ];
 
     const bottomNavItems = [

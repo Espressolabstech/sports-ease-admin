@@ -11,7 +11,10 @@ export interface PlayerListParams {
 }
 
 export const listPlayers = (params?: PlayerListParams) =>
-    apiClient<{ players: any[]; pagination: { total: number; page: number; limit: number } }>({
+    apiClient<{
+        players: any[];
+        pagination: { total: number; page: number; limit: number };
+    }>({
         url: endpoints.players,
         method: 'GET',
         params,
@@ -23,11 +26,16 @@ export const getPlayer = (id: string) =>
         method: 'GET',
     });
 
-export const updatePlayerStatus = (id: string, status: 'ACTIVE' | 'INACTIVE' | 'BANNED') =>
+export const updatePlayerStatus = (
+    id: string,
+    status: 'ACTIVE' | 'INACTIVE' | 'BANNED',
+    reason?: string,
+    notes?: string,
+) =>
     apiClient<{ player: any }>({
         url: endpoints.playerStatus(id),
         method: 'PATCH',
-        data: { status },
+        data: { status, reason, notes },
     });
 
 export const adjustPlayerWallet = (
