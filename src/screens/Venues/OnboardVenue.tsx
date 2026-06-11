@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { Copy, ExternalLink } from 'lucide-react';
+import { Copy, ExternalLink, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
+import { Switch } from '../../components/ui/switch';
 import { generateInviteMagicLink } from '../../api/adapters/onboarding';
 
 const COUNTRY_CODES = ['+91', '+971', '+1', '+44', '+61', '+65'];
@@ -41,23 +42,26 @@ const Field = ({
 
 const OnboardVenue = () => {
     const [form, setForm] = useState(INITIAL_FORM);
+    const [isPrivateClub, setIsPrivateClub] = useState(false);
     const [magicLink, setMagicLink] = useState('');
+    const [clubLink, setClubLink] = useState('');
 
     const set = (key: keyof typeof INITIAL_FORM) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
         setForm((f) => ({ ...f, [key]: e.target.value }));
 
     const mutation = useMutation({
-        mutationFn: () => generateInviteMagicLink(form),
+        mutationFn: () => generateInviteMagicLink({ ...form, isPrivateClub }),
         onSuccess: (res) => {
             setMagicLink(res.magicLink);
+            setClubLink(res.clubLink ?? '');
             toast.success('Magic link generated — email sent to venue');
             setForm(INITIAL_FORM);
         },
         onError: (err: any) => toast.error(err.message || 'Failed to generate magic link'),
     });
 
-    const copyLink = async () => {
-        await navigator.clipboard.writeText(magicLink);
+    const copyLink = async (link: string) => {
+        await navigator.clipboard.writeText(link);
         toast.success('Link copied to clipboard');
     };
 
@@ -80,6 +84,37 @@ const OnboardVenue = () => {
                 <p className="mt-1 text-sm text-muted-foreground">
                     Creates the venue and manager account, then emails a magic link to the venue so they can complete onboarding.
                 </p>
+            </div>
+
+            {/* Venue type selector */}
+            <div className="rounded-xl bg-card shadow-sm">
+                <div className="border-b border-border px-6 py-4">
+                    <h2 className="text-sm font-semibold text-foreground">Venue Type</h2>
+                </div>
+                <div className="p-6">
+                    <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                        <div className="flex items-center gap-3">
+                            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isPrivateClub ? 'bg-[hsl(var(--admin-navy))] text-[hsl(var(--admin-navy-foreground))]' : 'bg-muted text-muted-foreground'}`}>
+                                <Lock className="h-4 w-4" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-foreground">Private Club</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Enables points-based booking system and member management for this venue.
+                                </p>
+                            </div>
+                        </div>
+                        <Switch
+                            checked={isPrivateClub}
+                            onCheckedChange={setIsPrivateClub}
+                        />
+                    </div>
+                    {isPrivateClub && (
+                        <p className="mt-3 text-xs text-[hsl(var(--admin-navy))]">
+                            This venue will be set up as a private club with points enabled. Members will book using points instead of cash.
+                        </p>
+                    )}
+                </div>
             </div>
 
             <div className="rounded-xl bg-card shadow-sm">
@@ -144,23 +179,62 @@ const OnboardVenue = () => {
                 >
                     {mutation.isPending ? 'Generating...' : 'Generate Magic Link'}
                 </Button>
+                {isPrivateClub && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--admin-navy))]/10 px-3 py-1 text-xs font-medium text-[hsl(var(--admin-navy))]">
+                        <Lock className="h-3 w-3" /> Private Club
+                    </span>
+                )}
             </div>
 
             {magicLink && (
-                <div className="rounded-xl border border-[hsl(var(--admin-lime))]/30 bg-[hsl(var(--admin-lime))]/5 p-4 space-y-3">
-                    <p className="text-sm font-medium text-foreground">Magic link generated — email sent to venue</p>
-                    <p className="text-xs text-muted-foreground">Share this link with the venue manager if the email doesn't arrive.</p>
-                    <div className="flex items-center gap-2">
-                        <Input value={magicLink} readOnly className="flex-1 bg-card text-xs font-mono" />
-                        <Button size="icon" variant="outline" onClick={copyLink} title="Copy link">
-                            <Copy className="h-4 w-4" />
-                        </Button>
-                        <a href={magicLink} target="_blank" rel="noopener noreferrer">
-                            <Button size="icon" variant="outline" title="Open link">
-                                <ExternalLink className="h-4 w-4" />
+                <div className="space-y-3">
+                    {/* Onboarding magic link */}
+                    <div className="rounded-xl border border-[hsl(var(--admin-lime))]/30 bg-[hsl(var(--admin-lime))]/5 p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-foreground">Magic link generated — email sent to venue</p>
+                            {clubLink && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--admin-navy))]/10 px-2 py-0.5 text-[10px] font-semibold text-[hsl(var(--admin-navy))]">
+                                    <Lock className="h-2.5 w-2.5" /> Private Club
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Share this link with the venue manager if the email doesn't arrive.</p>
+                        <div className="flex items-center gap-2">
+                            <Input value={magicLink} readOnly className="flex-1 bg-card text-xs font-mono" />
+                            <Button size="icon" variant="outline" onClick={() => copyLink(magicLink)} title="Copy link">
+                                <Copy className="h-4 w-4" />
                             </Button>
-                        </a>
+                            <a href={magicLink} target="_blank" rel="noopener noreferrer">
+                                <Button size="icon" variant="outline" title="Open link">
+                                    <ExternalLink className="h-4 w-4" />
+                                </Button>
+                            </a>
+                        </div>
                     </div>
+
+                    {/* Club member link — only for private clubs */}
+                    {clubLink && (
+                        <div className="rounded-xl border border-[hsl(var(--admin-navy))]/20 bg-[hsl(var(--admin-navy))]/5 p-4 space-y-3">
+                            <div className="flex items-center gap-2">
+                                <Lock className="h-4 w-4 text-[hsl(var(--admin-navy))]" />
+                                <p className="text-sm font-medium text-foreground">Member club link</p>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                This link is where members log in and book courts. It's already included in the email — keep it for your records.
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <Input value={clubLink} readOnly className="flex-1 bg-card text-xs font-mono" />
+                                <Button size="icon" variant="outline" onClick={() => copyLink(clubLink)} title="Copy club link">
+                                    <Copy className="h-4 w-4" />
+                                </Button>
+                                <a href={clubLink} target="_blank" rel="noopener noreferrer">
+                                    <Button size="icon" variant="outline" title="Open club link">
+                                        <ExternalLink className="h-4 w-4" />
+                                    </Button>
+                                </a>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

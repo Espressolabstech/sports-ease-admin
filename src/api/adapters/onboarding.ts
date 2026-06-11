@@ -12,10 +12,11 @@ export interface GenerateMagicLinkParams {
     managerName: string;
     managerPhone: string;
     countryCode: string;
+    isPrivateClub?: boolean;
 }
 
 export const generateInviteMagicLink = (data: GenerateMagicLinkParams) =>
-    apiClient<{ magicLink: string }>({
+    apiClient<{ magicLink: string; clubLink?: string }>({
         url: endpoints.onboardGenerateMagicLink,
         method: 'POST',
         data,
