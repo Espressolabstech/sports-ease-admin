@@ -281,3 +281,44 @@ export const createEventPayout = (
 
 export const voidEventPayout = (payoutId: string, reason: string) =>
     apiClient<{ payout: EventPayoutRecord }>({ url: endpoints.eventPayoutVoid(payoutId), method: 'POST', data: { reason } });
+
+export interface OrganizerOption {
+    id: string;
+    name: string | null;
+    phone: string;
+}
+
+export const listOrganizers = (search?: string) =>
+    apiClient<{ organizers: OrganizerOption[] }>({ url: endpoints.organizers, method: 'GET', params: { search } });
+
+export const createOrganizer = (data: { phone: string; name: string }) =>
+    apiClient<{ organizer: OrganizerOption }>({ url: endpoints.organizers, method: 'POST', data });
+
+export interface CreateEventBody {
+    organizerId: string;
+    title: string;
+    description?: string;
+    sport: 'PADEL' | 'PICKLEBALL';
+    format?: string;
+    venueName: string;
+    venueArea?: string;
+    dateISO: string;
+    dateEndISO?: string;
+    time: string;
+    endTime?: string;
+    capacity: number;
+    courts: number;
+    roundMinutes: number;
+    pointsPerRound: number;
+    registrationProfile?: boolean;
+    skillLevel: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+    priceInr: number;
+    publish?: boolean;
+}
+
+export const createEvent = (data: CreateEventBody) =>
+    apiClient<{ event: { id: string; slug: string; title: string } }>({
+        url: endpoints.events,
+        method: 'POST',
+        data,
+    });

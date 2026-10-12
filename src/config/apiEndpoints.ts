@@ -49,6 +49,7 @@ export const endpoints = {
     eventLedger: '/admin/events/ledger',
     eventPayouts: (eventId: string) => `/admin/events/${eventId}/payouts`,
     eventPayoutVoid: (payoutId: string) => `/admin/events/payouts/${payoutId}/void`,
+    organizers: '/admin/organizers',
 
     // Team & roles
     team: '/admin/team',

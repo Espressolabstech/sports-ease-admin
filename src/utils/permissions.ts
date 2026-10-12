@@ -17,6 +17,7 @@ export type AdminPermission =
     | 'payouts.manage'
     | 'ledger.view'
     | 'events.view'
+    | 'events.manage'
     | 'events.payouts'
     | 'settings.view'
     | 'settings.manage'
@@ -46,6 +47,7 @@ export const PERMISSION_LABEL: Record<AdminPermission, string> = {
     'payouts.manage': 'Process venue payouts',
     'ledger.view': 'View platform ledger',
     'events.view': 'View events, hosts & event ledger',
+    'events.manage': 'Create events for any host',
     'events.payouts': 'Pay tournament hosts',
     'settings.view': 'View settings',
     'settings.manage': 'Change settings',

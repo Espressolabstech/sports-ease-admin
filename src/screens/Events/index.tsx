@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     AlertTriangle,
     Banknote,
@@ -22,6 +22,7 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { getEventsSummary, listEventHosts, listEvents } from '../../api/adapters/events';
 import { FinancialBreakdown, Pager, PayoutBadge, PillTabs, StatCard, TableSkeleton } from './shared';
 import EventLedger from './EventLedger';
+import CreateEventDialog from './CreateEventDialog';
 import { Button } from '../../components/ui/button';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import { fmtDate, fillLabel, inr } from './format';
@@ -164,6 +165,7 @@ function OverviewTab() {
 function TournamentsTab() {
     const navigate = useNavigate();
     const { can } = useAdminAuth();
+    const queryClient = useQueryClient();
     const [search, setSearch] = useState('');
     const [phase, setPhase] = useState('all');
     const [page, setPage] = useState(1);
@@ -197,6 +199,9 @@ function TournamentsTab() {
                         <SelectItem value="COMPLETED">Completed</SelectItem>
                     </SelectContent>
                 </Select>
+                {can('events.manage') && (
+                    <CreateEventDialog onCreated={() => queryClient.invalidateQueries({ queryKey: ['admin-events-list'] })} />
+                )}
             </div>
 
             <div className="rounded-xl bg-card shadow-sm">
