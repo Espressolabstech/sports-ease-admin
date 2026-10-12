@@ -32,10 +32,10 @@ const Login = () => {
             <div className="w-full max-w-sm space-y-8 px-4">
                 <div className="text-center">
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[hsl(var(--admin-navy))]">
-                        <span className="text-lg font-bold text-[hsl(var(--admin-lime))]">B</span>
+                        <span className="text-lg font-bold text-[hsl(var(--admin-lime))]">P</span>
                     </div>
                     <h1 className="mt-4 text-xl font-semibold text-[hsl(var(--admin-navy))]">
-                        BookEase Platform Admin
+                        PlayPass Platform Admin
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
                         Sign in with your admin email

@@ -15,13 +15,14 @@ const PAGE_SIZE = 25;
 const PAYOUT_TABS = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'] as const;
 
 export default function AdminPayoutsPage() {
-    const { isSuperAdmin } = useAdminAuth();
+    const { can } = useAdminAuth();
+    const canManage = can('payouts.manage');
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<string>('PENDING');
     const [page, setPage] = useState(1);
     const [processAllOpen, setProcessAllOpen] = useState(false);
 
-    if (!isSuperAdmin) {
+    if (!can('payouts.view')) {
         return (
             <div className="flex flex-col items-center justify-center rounded-xl bg-card py-20 shadow-sm">
                 <Lock className="h-12 w-12 text-muted-foreground/30" />
@@ -52,7 +53,7 @@ export default function AdminPayoutsPage() {
     const downloadReceipt = (payout: any) => {
         const doc = new jsPDF();
         doc.setFontSize(16);
-        doc.text('BookEase — Payout Receipt', 20, 25);
+        doc.text('PlayPass — Payout Receipt', 20, 25);
         doc.setFontSize(11);
         doc.text(`Venue: ${payout.venue?.name || '—'}`, 20, 45);
         doc.text(`Amount: INR ${payout.amount || 0}`, 20, 55);
@@ -78,7 +79,7 @@ export default function AdminPayoutsPage() {
                         </button>
                     ))}
                 </div>
-                {activeTab === 'PENDING' && (
+                {canManage && activeTab === 'PENDING' && (
                     <Button
                         size="sm"
                         onClick={() => setProcessAllOpen(true)}
@@ -123,12 +124,12 @@ export default function AdminPayoutsPage() {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex gap-1">
-                                                    {activeTab === 'PENDING' && (
+                                                    {canManage && activeTab === 'PENDING' && (
                                                         <Button size="sm" variant="outline" onClick={() => processMutation.mutate(p.id)} disabled={processMutation.isPending}>
                                                             Process
                                                         </Button>
                                                     )}
-                                                    {activeTab === 'FAILED' && (
+                                                    {canManage && activeTab === 'FAILED' && (
                                                         <Button size="sm" variant="outline" onClick={() => processMutation.mutate(p.id)} disabled={processMutation.isPending}>
                                                             Retry
                                                         </Button>

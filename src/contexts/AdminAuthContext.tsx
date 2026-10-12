@@ -2,17 +2,23 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useNavigate } from 'react-router-dom';
 import { getAdminMe } from '../api/adapters/auth';
 import { getToken, setToken, clearCookies } from '../utils/cookies.helpers';
+import type { AdminPermission, AdminRoleName } from '../utils/permissions';
 
 interface AdminUser {
     id: string;
     name: string;
+    email: string | null;
     phone: string;
     role: string;
+    adminRole: AdminRoleName;
+    permissions: AdminPermission[];
 }
 
 interface AdminAuthContextValue {
     adminUser: AdminUser | null;
     isSuperAdmin: boolean;
+    /** True when the signed-in admin's role includes this permission. */
+    can: (permission: AdminPermission) => boolean;
     isLoading: boolean;
     setAdminFromToken: (token: string, admin: AdminUser) => void;
     logout: () => void;
@@ -55,7 +61,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         <AdminAuthContext.Provider
             value={{
                 adminUser,
-                isSuperAdmin: adminUser?.role === 'SUPER_ADMIN' || adminUser?.role === 'ADMIN',
+                isSuperAdmin: adminUser?.adminRole === 'SUPER_ADMIN',
+                can: (permission) => Boolean(adminUser?.permissions?.includes(permission)),
                 isLoading,
                 setAdminFromToken,
                 logout,

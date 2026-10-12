@@ -36,6 +36,14 @@ export const getLedgerSummary = () =>
         totalInEscrow: number;
         commissionEarned: number;
         totalPaidOut: number;
+        events: {
+            collected: number;
+            gatewayFees: number;
+            gatewayGst: number;
+            platformFees: number;
+            platformGst: number;
+            paidToHosts: number;
+        };
         currentBalance: number;
         byType: { type: string; totalAmount: number; count: number }[];
     }>({

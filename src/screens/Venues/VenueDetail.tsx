@@ -45,7 +45,8 @@ const VenueDetails = () => {
     const { venueId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
     const queryClient = useQueryClient();
-    const { isSuperAdmin } = useAdminAuth();
+    const { can } = useAdminAuth();
+    const canManageVenue = can('venues.manage');
 
     const activeTab = searchParams.get('tab') || 'overview';
     const setActiveTab = (tab: string) => setSearchParams({ tab });
@@ -136,7 +137,7 @@ const VenueDetails = () => {
                     </div>
 
                     <div className="hidden items-center gap-2 sm:flex">
-                        {venue.status === 'ACTIVE' && isSuperAdmin && (
+                        {venue.status === 'ACTIVE' && canManageVenue && (
                             <Button
                                 size="sm"
                                 variant="outline"
@@ -147,7 +148,7 @@ const VenueDetails = () => {
                                 Suspend
                             </Button>
                         )}
-                        {venue.status === 'BANNED' && isSuperAdmin && (
+                        {venue.status === 'BANNED' && canManageVenue && (
                             <Button
                                 size="sm"
                                 onClick={() => reinstateMutation.mutate()}

@@ -12,9 +12,9 @@ interface Props {
 }
 
 export default function VenueSettingsTab({ venueId, venue }: Props) {
-    const { isSuperAdmin } = useAdminAuth();
+    const { can } = useAdminAuth();
 
-    if (!isSuperAdmin) {
+    if (!can('venues.manage')) {
         return (
             <div className="flex flex-col items-center justify-center rounded-xl bg-card py-20 shadow-sm">
                 <Lock className="h-12 w-12 text-muted-foreground/30" />

@@ -25,7 +25,7 @@ interface Props {
 }
 
 export default function VenuePayoutsTab({ venueId, venueName }: Props) {
-    const { isSuperAdmin } = useAdminAuth();
+    const { can } = useAdminAuth();
     const queryClient = useQueryClient();
     const [processPayoutId, setProcessPayoutId] = useState<string | null>(null);
 
@@ -60,7 +60,7 @@ export default function VenuePayoutsTab({ venueId, venueName }: Props) {
         doc.setFontSize(11);
         const bankDetails = payout.venueBankDetails;
         const lines = [
-            `Platform: BookEase`,
+            `Platform: PlayPass`,
             `Venue: ${venueName}`,
             `Amount: INR ${payout.amount || 0}`,
             `Status: ${payout.status}`,
@@ -157,7 +157,7 @@ export default function VenuePayoutsTab({ venueId, venueName }: Props) {
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex gap-1">
-                                                {isSuperAdmin && (p.status === 'PENDING' || p.status === 'FAILED') && (
+                                                {can('payouts.manage') && (p.status === 'PENDING' || p.status === 'FAILED') && (
                                                     <Button
                                                         size="sm"
                                                         variant="outline"

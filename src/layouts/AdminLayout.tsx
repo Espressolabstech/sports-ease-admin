@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Building2, CalendarCheck, Menu } from 'lucide-react';
+import { LayoutDashboard, Building2, CalendarCheck, Menu, Trophy } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { AdminSidebar } from '../components/admin/AdminSidebar';
 import { Sheet, SheetContent } from '../components/ui/sheet';
@@ -11,7 +11,7 @@ import { cn } from '../utils/twMerge';
 function AdminLayoutInner() {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-    const { adminUser, isLoading } = useAdminAuth();
+    const { adminUser, isLoading, can } = useAdminAuth();
 
     if (isLoading) {
         return (
@@ -26,10 +26,11 @@ function AdminLayoutInner() {
     }
 
     const mobileBottomTabs = [
-        { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/admin/venues', icon: Building2, label: 'Venues' },
-        { to: '/admin/bookings', icon: CalendarCheck, label: 'Bookings' },
-    ];
+        ...(can('dashboard.view') ? [{ to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' }] : []),
+        ...(can('venues.view') ? [{ to: '/admin/venues', icon: Building2, label: 'Venues' }] : []),
+        ...(can('bookings.view') ? [{ to: '/admin/bookings', icon: CalendarCheck, label: 'Bookings' }] : []),
+        ...(can('events.view') ? [{ to: '/admin/events', icon: Trophy, label: 'Events' }] : []),
+    ].slice(0, 4);
 
     return (
         <div className="flex min-h-screen w-full bg-[hsl(var(--admin-bg))]">
@@ -60,9 +61,9 @@ function AdminLayoutInner() {
                         <Menu className="h-5 w-5" />
                     </button>
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[hsl(var(--admin-navy))]">
-                        <span className="text-xs font-bold text-[hsl(var(--admin-lime))]">B</span>
+                        <span className="text-xs font-bold text-[hsl(var(--admin-lime))]">P</span>
                     </div>
-                    <span className="text-sm font-semibold">BookEase Admin</span>
+                    <span className="text-sm font-semibold">PlayPass Admin</span>
                 </div>
 
                 <div className="hidden md:block">

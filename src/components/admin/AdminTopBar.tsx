@@ -8,6 +8,7 @@ import { listVenues } from '../../api/adapters/venues';
 import { listPlayers } from '../../api/adapters/players';
 import { listPendingVenues } from '../../api/adapters/venues';
 import { listPayouts } from '../../api/adapters/payouts';
+import { useAdminAuth } from '../../contexts/AdminAuthContext';
 
 const routeTitles: Record<string, string> = {
     '/admin/dashboard': 'Dashboard',
@@ -20,9 +21,12 @@ const routeTitles: Record<string, string> = {
     '/admin/players': 'Players',
     '/admin/settings': 'Settings',
     '/admin/ledger': 'Ledger',
+    '/admin/events': 'Events',
+    '/admin/team': 'Team & Roles',
 };
 
 export function AdminTopbar() {
+    const { can } = useAdminAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [searchOpen, setSearchOpen] = useState(false);
@@ -33,6 +37,8 @@ export function AdminTopbar() {
     if (location.pathname.includes('/review')) pageTitle = 'Venue Review';
     if (location.pathname.match(/\/admin\/venues\/[^/]+$/) && !location.pathname.includes('pending'))
         pageTitle = 'Venue Detail';
+    if (location.pathname.match(/\/admin\/events\/[^/]+$/)) pageTitle = 'Tournament Detail';
+    if (location.pathname.match(/\/admin\/event-hosts\/[^/]+$/)) pageTitle = 'Host Detail';
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -49,9 +55,10 @@ export function AdminTopbar() {
         queryKey: ['admin-notif-counts'],
         refetchInterval: 60000,
         queryFn: async () => {
+            // Only ask for what this role is allowed to see.
             const [pending, failed] = await Promise.all([
-                listPendingVenues(),
-                listPayouts({ status: 'FAILED', limit: 1 }),
+                can('venues.view') ? listPendingVenues() : Promise.resolve({ venues: [] }),
+                can('payouts.view') ? listPayouts({ status: 'FAILED', limit: 1 }) : Promise.resolve({ pagination: { total: 0 } }),
             ]);
             const pendingVenues = pending.venues.length;
             const failedPayouts = failed.pagination.total;
@@ -64,8 +71,8 @@ export function AdminTopbar() {
         enabled: searchQuery.length >= 2,
         queryFn: async () => {
             const [venues, players] = await Promise.all([
-                listVenues({ search: searchQuery, limit: 4 }),
-                listPlayers({ search: searchQuery, limit: 4 }),
+                can('venues.view') ? listVenues({ search: searchQuery, limit: 4 }) : Promise.resolve({ venues: [] }),
+                can('players.view') ? listPlayers({ search: searchQuery, limit: 4 }) : Promise.resolve({ players: [] }),
             ]);
             return { venues: venues.venues, players: players.players };
         },

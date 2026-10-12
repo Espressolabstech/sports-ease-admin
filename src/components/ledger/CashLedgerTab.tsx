@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Skeleton } from '../ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { ChevronLeft, ChevronRight, Download, Vault, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Vault, TrendingUp, ArrowUpRight, Trophy, Percent, Banknote } from 'lucide-react';
 import { listLedger, getLedgerSummary } from '../../api/adapters/ledger';
 import { listVenues } from '../../api/adapters/venues';
 import { cn } from '../../utils/twMerge';
@@ -20,6 +21,7 @@ function getPlayerName(entry: any): string {
         entry.booking?.user?.name ||
         entry.packagePurchase?.user?.name ||
         entry.walletTxn?.wallet?.user?.name ||
+        entry.eventEntrant?.name ||
         '—'
     );
 }
@@ -33,15 +35,39 @@ function entryStatus(type: string): { label: string; cls: string } {
         case 'REFUND_TO_USER': return { label: 'Refund', cls: 'bg-red-100 text-red-700' };
         case 'WALLET_CREDIT_ISSUED': return { label: 'Wallet Credit', cls: 'bg-indigo-100 text-indigo-700' };
         case 'BOOKING_PAYMENT_FAILED': return { label: 'Failed', cls: 'bg-red-100 text-red-700' };
+        case 'EVENT_ENTRY_COLLECTED': return { label: 'Tournament entry', cls: 'bg-green-100 text-green-700' };
+        case 'EVENT_GATEWAY_FEE': return { label: 'Gateway fee', cls: 'bg-orange-100 text-orange-700' };
+        case 'EVENT_COMMISSION_EARNED': return { label: 'Platform fee', cls: 'bg-purple-100 text-purple-700' };
+        case 'EVENT_GST': return { label: 'GST', cls: 'bg-slate-100 text-slate-700' };
+        case 'EVENT_HOST_PAYOUT': return { label: 'Host payout', cls: 'bg-blue-100 text-blue-700' };
+        case 'EVENT_PAYOUT_REVERSED': return { label: 'Payout reversed', cls: 'bg-red-100 text-red-700' };
         default: return { label: type.replace(/_/g, ' '), cls: 'bg-muted text-muted-foreground' };
     }
 }
+
+// Rows that record a figure (fee, GST) without moving cash.
+const MEMO_TYPES = new Set(['EVENT_COMMISSION_EARNED', 'EVENT_GST']);
+
+const TYPE_OPTIONS: { value: string; label: string }[] = [
+    { value: 'BOOKING_PAYMENT_COLLECTED', label: 'Booking payments' },
+    { value: 'CREDIT_PACKAGE_COLLECTED', label: 'Credit packages' },
+    { value: 'COMMISSION_EARNED', label: 'Venue commission' },
+    { value: 'VENUE_PAYOUT', label: 'Venue payouts' },
+    { value: 'REFUND_TO_USER', label: 'Refunds' },
+    { value: 'EVENT_ENTRY_COLLECTED', label: 'Tournament entries' },
+    { value: 'EVENT_GATEWAY_FEE', label: 'Tournament gateway fees' },
+    { value: 'EVENT_COMMISSION_EARNED', label: 'Tournament platform fees' },
+    { value: 'EVENT_GST', label: 'Tournament GST' },
+    { value: 'EVENT_HOST_PAYOUT', label: 'Host payouts' },
+    { value: 'EVENT_PAYOUT_REVERSED', label: 'Host payout reversals' },
+];
 
 export default function CashLedgerTab({ isManager: _isManager }: Props) {
     const [page, setPage] = useState(1);
     const [from, setFrom] = useState('');
     const [to, setTo] = useState('');
     const [venueFilter, setVenueFilter] = useState('all');
+    const [typeFilter, setTypeFilter] = useState('all');
 
     const resetPage = () => setPage(1);
 
@@ -57,7 +83,7 @@ export default function CashLedgerTab({ isManager: _isManager }: Props) {
     });
 
     const { data, isLoading } = useQuery({
-        queryKey: ['admin-ledger', page, from, to, venueFilter],
+        queryKey: ['admin-ledger', page, from, to, venueFilter, typeFilter],
         queryFn: () =>
             listLedger({
                 page,
@@ -65,6 +91,7 @@ export default function CashLedgerTab({ isManager: _isManager }: Props) {
                 from: from || undefined,
                 to: to || undefined,
                 venueId: venueFilter === 'all' ? undefined : venueFilter,
+                type: typeFilter === 'all' ? undefined : typeFilter,
             }),
     });
 
@@ -81,14 +108,14 @@ export default function CashLedgerTab({ isManager: _isManager }: Props) {
 
     const exportCSV = () => {
         if (!entries.length) return;
-        const headers = ['Date', 'Type', 'Venue', 'Player', 'Amount (INR)', 'Reference'];
+        const headers = ['Date', 'Type', 'Venue / Tournament', 'Player', 'Amount (INR)', 'Reference'];
         const rows = entries.map((e: any) => [
             e.createdAt ? new Date(e.createdAt).toLocaleDateString() : '',
             e.type,
-            e.venue?.name || '',
+            e.venue?.name || e.event?.title || '',
             getPlayerName(e),
             Math.abs(Number(e.amount)),
-            e.booking?.bookingRef || e.razorpayRef || '',
+            e.booking?.bookingRef || e.eventPayout?.reference || e.razorpayRef || '',
         ]);
         const csv = [headers, ...rows].map((r) => r.map((v: any) => `"${v}"`).join(',')).join('\n');
         const a = document.createElement('a');
@@ -136,6 +163,32 @@ export default function CashLedgerTab({ isManager: _isManager }: Props) {
                 </div>
             </div>
 
+            {/* Tournament money */}
+            <div>
+                <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <Trophy className="h-3.5 w-3.5" /> Tournaments
+                </p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                    {[
+                        { label: 'Entry fees collected', value: summary?.events?.collected, icon: Banknote, bg: 'bg-green-50', fg: 'text-green-500' },
+                        { label: 'Platform fees earned', value: summary?.events?.platformFees, icon: Percent, bg: 'bg-purple-50', fg: 'text-purple-500' },
+                        { label: 'Paid to hosts', value: summary?.events?.paidToHosts, icon: ArrowUpRight, bg: 'bg-blue-50', fg: 'text-blue-500' },
+                    ].map((c) => (
+                        <div key={c.label} className="rounded-xl bg-card p-5 shadow-sm flex items-start gap-4">
+                            <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', c.bg)}>
+                                <c.icon className={cn('h-5 w-5', c.fg)} />
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">{c.label}</p>
+                                {summary ? (
+                                    <p className="text-2xl font-bold mt-0.5">₹{Number(c.value ?? 0).toLocaleString()}</p>
+                                ) : <Skeleton className="h-7 w-28 mt-1" />}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-2">
                 <Input
@@ -166,6 +219,17 @@ export default function CashLedgerTab({ isManager: _isManager }: Props) {
                         ))}
                     </SelectContent>
                 </Select>
+                <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); resetPage(); }}>
+                    <SelectTrigger className="h-8 w-[200px] text-xs">
+                        <SelectValue placeholder="All entry types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All entry types</SelectItem>
+                        {TYPE_OPTIONS.map((t) => (
+                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
                 <div className="ml-auto">
                     <Button variant="outline" size="sm" className="h-8 text-xs" onClick={exportCSV}>
                         <Download className="mr-1.5 h-3.5 w-3.5" /> Export
@@ -192,7 +256,7 @@ export default function CashLedgerTab({ isManager: _isManager }: Props) {
                                         <th className="px-4 py-3 font-medium text-muted-foreground">Timestamp</th>
                                         <th className="px-4 py-3 font-medium text-muted-foreground">Type</th>
                                         <th className="px-4 py-3 font-medium text-muted-foreground">Reference</th>
-                                        <th className="px-4 py-3 font-medium text-muted-foreground">Venue</th>
+                                        <th className="px-4 py-3 font-medium text-muted-foreground">Venue / Tournament</th>
                                         <th className="px-4 py-3 font-medium text-muted-foreground">Player</th>
                                         <th className="px-4 py-3 font-medium text-muted-foreground text-right">Amount</th>
                                         <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
@@ -212,12 +276,17 @@ export default function CashLedgerTab({ isManager: _isManager }: Props) {
                                                     {entry.type.replace(/_/g, ' ')}
                                                 </td>
                                                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                                                    {entry.booking?.bookingRef || entry.razorpayRef || '—'}
+                                                    {entry.booking?.bookingRef || entry.eventPayout?.reference || entry.razorpayRef || '—'}
                                                 </td>
-                                                <td className="px-4 py-3 text-muted-foreground">{entry.venue?.name || '—'}</td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {entry.venue?.name || (entry.event ? (
+                                                        <Link to={`/admin/events/${entry.event.id}?tab=ledger`} className="hover:underline">{entry.event.title}</Link>
+                                                    ) : '—')}
+                                                </td>
                                                 <td className="px-4 py-3">{getPlayerName(entry)}</td>
-                                                <td className={cn('px-4 py-3 font-semibold text-right', isNeg ? 'text-red-500' : 'text-[hsl(var(--admin-status-lime))]')}>
-                                                    {isNeg ? '−' : '+'}₹{Math.abs(amount).toLocaleString()}
+                                                <td className={cn('px-4 py-3 font-semibold text-right', MEMO_TYPES.has(entry.type) ? 'text-muted-foreground' : isNeg ? 'text-red-500' : 'text-[hsl(var(--admin-status-lime))]')}>
+                                                    {MEMO_TYPES.has(entry.type) ? '' : isNeg ? '−' : '+'}₹{Math.abs(amount).toLocaleString()}
+                                                    {MEMO_TYPES.has(entry.type) && <span className="ml-1 text-[10px] font-normal uppercase">memo</span>}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', status.cls)}>

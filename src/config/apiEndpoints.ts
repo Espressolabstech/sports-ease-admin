@@ -40,6 +40,20 @@ export const endpoints = {
     playerStatus: (id: string) => `/admin/players/${id}/status`,
     playerWalletAdjustment: (id: string) => `/admin/players/${id}/wallet-adjustment`,
 
+    // Events (tournaments, hosts, event financials)
+    eventsSummary: '/admin/events/summary',
+    events: '/admin/events',
+    eventDetail: (id: string) => `/admin/events/${id}`,
+    eventHosts: '/admin/event-hosts',
+    eventHostDetail: (id: string) => `/admin/event-hosts/${id}`,
+    eventLedger: '/admin/events/ledger',
+    eventPayouts: (eventId: string) => `/admin/events/${eventId}/payouts`,
+    eventPayoutVoid: (payoutId: string) => `/admin/events/payouts/${payoutId}/void`,
+
+    // Team & roles
+    team: '/admin/team',
+    teamMember: (id: string) => `/admin/team/${id}`,
+
     // Invitations
     invitations: '/admin/invitations',
     invitationRevoke: (id: string) => `/admin/invitations/${id}/revoke`,

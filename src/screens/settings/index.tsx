@@ -11,9 +11,9 @@ import { useAdminAuth } from '../../contexts/AdminAuthContext';
 
 
 export default function AdminSettingsPage() {
-    const { isSuperAdmin } = useAdminAuth();
+    const { can } = useAdminAuth();
 
-    if (!isSuperAdmin) {
+    if (!can('settings.view')) {
         return (
             <div className="flex flex-col items-center justify-center rounded-xl bg-card py-20 shadow-sm">
                 <Lock className="h-12 w-12 text-muted-foreground/30" />

@@ -13,6 +13,7 @@ const statusMap: Record<string, StatusVariant> = {
     in_progress: 'amber',
     processing: 'amber',
     // Blue
+    published: 'blue',
     submitted: 'blue',
     under_review: 'blue',
     link_opened: 'blue',

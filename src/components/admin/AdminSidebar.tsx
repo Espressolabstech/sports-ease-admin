@@ -9,6 +9,8 @@ import {
     DollarSign,
     BookOpen,
     Users,
+    Trophy,
+    ShieldCheck,
     Settings,
     ChevronDown,
     ChevronRight,
@@ -21,6 +23,7 @@ import { useQuery } from '@tanstack/react-query';
 import { cn } from '../../utils/twMerge';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import { listPendingVenues } from '../../api/adapters/venues';
+import { ROLE_LABEL } from '../../utils/permissions';
 
 interface AdminSidebarProps {
     collapsed: boolean;
@@ -29,7 +32,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
     const location = useLocation();
-    const { adminUser, isSuperAdmin, logout } = useAdminAuth();
+    const { adminUser, can, logout } = useAdminAuth();
     const [venuesOpen, setVenuesOpen] = useState(
         location.pathname.startsWith('/admin/venues') ||
             location.pathname.startsWith('/admin/courts'),
@@ -37,6 +40,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
 
     const { data: pendingData } = useQuery({
         queryKey: ['admin-pending-venues-count'],
+        enabled: can('venues.view'),
         queryFn: () => listPendingVenues(),
         select: (res) => res.venues.length,
     });
@@ -52,8 +56,8 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
         );
 
     const navItems = [
-        { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/admin/invitations', icon: Mail, label: 'Invitations' },
+        ...(can('dashboard.view') ? [{ to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' }] : []),
+        ...(can('invitations.manage') ? [{ to: '/admin/invitations', icon: Mail, label: 'Invitations' }] : []),
     ];
 
     const venueSubItems = [
@@ -63,12 +67,14 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
     ];
 
     const bottomNavItems = [
-        { to: '/admin/courts', icon: ClipboardList, label: 'Courts' },
-        { to: '/admin/bookings', icon: CalendarCheck, label: 'Bookings' },
-        ...(isSuperAdmin ? [{ to: '/admin/payouts', icon: DollarSign, label: 'Payouts' }] : []),
-        { to: '/admin/ledger', icon: BookOpen, label: 'Ledger' },
-        { to: '/admin/players', icon: Users, label: 'Players' },
-        ...(isSuperAdmin ? [{ to: '/admin/settings', icon: Settings, label: 'Settings' }] : []),
+        ...(can('courts.view') ? [{ to: '/admin/courts', icon: ClipboardList, label: 'Courts' }] : []),
+        ...(can('bookings.view') ? [{ to: '/admin/bookings', icon: CalendarCheck, label: 'Bookings' }] : []),
+        ...(can('events.view') ? [{ to: '/admin/events', icon: Trophy, label: 'Events' }] : []),
+        ...(can('payouts.view') ? [{ to: '/admin/payouts', icon: DollarSign, label: 'Payouts' }] : []),
+        ...(can('ledger.view') ? [{ to: '/admin/ledger', icon: BookOpen, label: 'Ledger' }] : []),
+        ...(can('players.view') ? [{ to: '/admin/players', icon: Users, label: 'Players' }] : []),
+        ...(can('admins.manage') ? [{ to: '/admin/team', icon: ShieldCheck, label: 'Team & Roles' }] : []),
+        ...(can('settings.view') ? [{ to: '/admin/settings', icon: Settings, label: 'Settings' }] : []),
     ];
 
     return (
@@ -82,10 +88,10 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                 {!collapsed && (
                     <div className="flex items-center gap-2">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[hsl(var(--admin-lime))]">
-                            <span className="text-sm font-bold text-[hsl(var(--admin-navy))]">B</span>
+                            <span className="text-sm font-bold text-[hsl(var(--admin-navy))]">P</span>
                         </div>
                         <span className="text-sm font-semibold text-[hsl(var(--admin-navy-foreground))]">
-                            BookEase
+                            PlayPass
                         </span>
                     </div>
                 )}
@@ -110,6 +116,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                     </NavLink>
                 ))}
 
+                {can('venues.view') && (
                 <div>
                     <button
                         onClick={() => setVenuesOpen(!venuesOpen)}
@@ -160,6 +167,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                         </div>
                     )}
                 </div>
+                )}
 
                 {bottomNavItems.map((item) => (
                     <NavLink
@@ -191,8 +199,8 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                                     {adminUser.name}
                                 </p>
                                 <StatusBadge
-                                    status={adminUser.role}
-                                    variant={adminUser.role === 'SUPER_ADMIN' ? 'lime' : 'blue'}
+                                    status={ROLE_LABEL[adminUser.adminRole] ?? adminUser.adminRole}
+                                    variant={adminUser.adminRole === 'SUPER_ADMIN' ? 'lime' : 'blue'}
                                     className="mt-0.5"
                                 />
                             </div>

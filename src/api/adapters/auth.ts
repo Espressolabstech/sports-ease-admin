@@ -1,5 +1,6 @@
 import apiClient from '../client/apiClient';
 import { endpoints } from '../../config/apiEndpoints';
+import type { AdminPermission, AdminRoleName } from '../../utils/permissions';
 
 export const loginAdmin = (phone: string) =>
     apiClient<{ message: string }>({
@@ -23,7 +24,18 @@ export const loginAdminWithPassword = (email: string, password: string) =>
     });
 
 export const getAdminMe = () =>
-    apiClient<{ admin: { id: string; name: string; phone: string; role: string; createdAt: string } }>({
+    apiClient<{
+        admin: {
+            id: string;
+            name: string;
+            email: string | null;
+            phone: string;
+            role: string;
+            adminRole: AdminRoleName;
+            permissions: AdminPermission[];
+            createdAt: string;
+        };
+    }>({
         url: endpoints.me,
         method: 'GET',
     });

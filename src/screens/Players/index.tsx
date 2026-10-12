@@ -55,7 +55,8 @@ const BAN_REASONS = [
 ];
 
 export default function AdminPlayersPage() {
-    const { isSuperAdmin } = useAdminAuth();
+    const { can } = useAdminAuth();
+    const canManagePlayers = can('players.manage');
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -254,7 +255,7 @@ export default function AdminPlayersPage() {
                                                         >
                                                             <Eye className="h-4 w-4" />
                                                         </Button>
-                                                        {isSuperAdmin &&
+                                                        {canManagePlayers &&
                                                             !isBanned && (
                                                                 <Button
                                                                     size="sm"
@@ -269,7 +270,7 @@ export default function AdminPlayersPage() {
                                                                     <Ban className="h-4 w-4 text-[hsl(var(--admin-status-red))]" />
                                                                 </Button>
                                                             )}
-                                                        {isSuperAdmin &&
+                                                        {canManagePlayers &&
                                                             isBanned && (
                                                                 <Button
                                                                     size="sm"
