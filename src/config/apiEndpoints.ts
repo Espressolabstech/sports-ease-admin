@@ -50,6 +50,8 @@ export const endpoints = {
     eventPayouts: (eventId: string) => `/admin/events/${eventId}/payouts`,
     eventPayoutVoid: (payoutId: string) => `/admin/events/payouts/${payoutId}/void`,
     organizers: '/admin/organizers',
+    eventHostViewers: (eventId: string) => `/admin/events/${eventId}/host-viewers`,
+    eventHostViewer: (eventId: string, viewerId: string) => `/admin/events/${eventId}/host-viewers/${viewerId}`,
 
     // Team & roles
     team: '/admin/team',

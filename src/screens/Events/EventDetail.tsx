@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { createEventPayout, getEventDetail, voidEventPayout, type EventPayoutRecord } from '../../api/adapters/events';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import EventLedger from './EventLedger';
+import HostViewersPanel from './HostViewersPanel';
 import { FinancialBreakdown, PayoutBadge, PillTabs, Row, StatCard } from './shared';
 import { fmtDate, fmtDateTime, inr } from './format';
 
@@ -209,6 +210,7 @@ export default function AdminEventDetailPage() {
                                 <p className="text-sm leading-relaxed text-muted-foreground">{event.description}</p>
                             </div>
                         )}
+                        {can('events.manage') && eventId && <HostViewersPanel eventId={eventId} />}
                     </div>
                 </div>
             )}

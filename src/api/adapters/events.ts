@@ -322,3 +322,19 @@ export const createEvent = (data: CreateEventBody) =>
         method: 'POST',
         data,
     });
+
+export interface HostViewer {
+    id: string;
+    name: string | null;
+    phone: string;
+    createdAt: string;
+}
+
+export const listHostViewers = (eventId: string) =>
+    apiClient<{ viewers: HostViewer[] }>({ url: endpoints.eventHostViewers(eventId), method: 'GET' });
+
+export const createHostViewer = (eventId: string, data: { phone: string; name: string }) =>
+    apiClient<{ viewer: HostViewer }>({ url: endpoints.eventHostViewers(eventId), method: 'POST', data });
+
+export const deleteHostViewer = (eventId: string, viewerId: string) =>
+    apiClient<null>({ url: endpoints.eventHostViewer(eventId, viewerId), method: 'DELETE' });
