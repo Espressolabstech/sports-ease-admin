@@ -150,6 +150,12 @@ export interface EventEntrantRow {
     razorpayOrderId: string | null;
     registeredAt: string;
     needsAttention: boolean;
+    /**
+     * Temporary manual-payment path (shared UPI QR, no Razorpay) — set until
+     * a real gateway replaces this registration route. Needs a human to
+     * check the screenshot/UPI reference against what actually came in.
+     */
+    manualPayment: { proofUrl: string | null; upiRef: string | null } | null;
 }
 
 export interface EventDetail {

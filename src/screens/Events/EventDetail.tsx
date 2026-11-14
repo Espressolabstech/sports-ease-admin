@@ -14,10 +14,11 @@ import { createEventPayout, getEventDetail, voidEventPayout, type EventPayoutRec
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import EventLedger from './EventLedger';
 import HostViewersPanel from './HostViewersPanel';
+import AuctionAdminPanel from './auction/AuctionAdminPanel';
 import { FinancialBreakdown, PayoutBadge, PillTabs, Row, StatCard } from './shared';
 import { fmtDate, fmtDateTime, inr } from './format';
 
-type Tab = 'overview' | 'players' | 'financials' | 'payouts' | 'ledger';
+type Tab = 'overview' | 'players' | 'financials' | 'payouts' | 'ledger' | 'auction';
 
 const PAYOUT_METHODS = ['Bank transfer', 'UPI', 'Cash', 'Other'];
 const lime = 'bg-[hsl(var(--admin-lime))] text-[hsl(var(--admin-lime-foreground))] hover:bg-[hsl(var(--admin-lime))]/90';
@@ -171,6 +172,7 @@ export default function AdminEventDetailPage() {
                     { key: 'financials', label: 'Financials' },
                     { key: 'payouts', label: 'Host payout' },
                     { key: 'ledger', label: 'Ledger' },
+                    ...(can('events.manage') ? [{ key: 'auction' as const, label: 'Auction' }] : []),
                 ]}
                 value={tab}
                 onChange={(t) => setParams({ tab: t })}
@@ -265,6 +267,26 @@ export default function AdminEventDetailPage() {
                                                         <StatusBadge status="Unpaid" variant="red" />
                                                     )}
                                                     {p.needsAttention && <span className="ml-2 text-xs font-medium text-[hsl(var(--admin-status-amber))]">Promote or refund</span>}
+                                                    {p.manualPayment && (
+                                                        <div className="mt-1 flex items-center gap-2">
+                                                            <StatusBadge status="Manual (QR)" variant="amber" />
+                                                            {p.manualPayment.proofUrl && (
+                                                                <a
+                                                                    href={p.manualPayment.proofUrl}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="text-xs font-medium text-primary underline"
+                                                                >
+                                                                    View proof
+                                                                </a>
+                                                            )}
+                                                            {p.manualPayment.upiRef && (
+                                                                <span className="font-mono text-xs text-muted-foreground">
+                                                                    UPI: {p.manualPayment.upiRef}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3 text-muted-foreground">{p.source === 'WALK_IN' ? 'Walk-in' : 'Online signup'}</td>
                                                 <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{fmtDateTime(p.registeredAt)}</td>
@@ -373,6 +395,8 @@ export default function AdminEventDetailPage() {
             )}
 
             {tab === 'ledger' && <EventLedger eventId={event.id} />}
+
+            {tab === 'auction' && can('events.manage') && <AuctionAdminPanel eventId={event.id} />}
 
             <Dialog open={payoutOpen} onOpenChange={setPayoutOpen}>
                 <DialogContent>

@@ -1,0 +1,11 @@
+/* Additions to the prototype's styles for features this app has on top of it. */
+.pp-console .pp-team-card header { grid-template-columns: auto 1fr auto auto; }
+.pp-console .pp-team-card-add { border-style: dashed; }
+.pp-console .pp-team-card-add h3 { font-size: 14px; font-weight: 600; }
+.pp-console .pp-team-add-fields { display: grid; grid-template-columns: 1fr 120px; gap: 6px; margin-top: 12px; }
+.pp-console .pp-edit-details { position: absolute; right: 44px; top: 10px; height: 28px; width: 28px; }
+.pp-console .pp-edit-details svg { width: 14px; height: 14px; }
+
+/* The auction tab sits inside the admin dashboard: give the dark console a card's padding and corners. */
+.ccreg.pp-console.auction-admin-panel { padding: 28px 32px; border-radius: 12px; min-height: 0; }
+@media (max-width: 700px) { .ccreg.pp-console.auction-admin-panel { padding: 20px 16px; } }
