@@ -58,6 +58,9 @@ export const moveAuctionCategory = (eventId: string, categoryId: string, directi
 export const assignAuctionLots = (eventId: string, lotIds: string[], categoryId: string | null) =>
     wrap(apiClient<null>({ url: base(eventId, '/lots/assign'), method: 'POST', data: { lotIds, categoryId } }));
 
+export const assignSuggestedAuctionLots = (eventId: string) =>
+    wrap(apiClient<{ assigned: number }>({ url: base(eventId, '/lots/assign-suggested'), method: 'POST' }));
+
 export const retainAuctionPlayer = (eventId: string, lotId: string, teamId: string) =>
     wrap(apiClient<null>({ url: base(eventId, '/retain'), method: 'POST', data: { lotId, teamId } }));
 

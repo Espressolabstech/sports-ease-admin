@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowDown, ArrowUp, MoreHorizontal, Search } from 'lucide-react';
 import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/pp-ui';
 import { rupees, suggestCategory, byNumber } from '../../../lib/auction';
-import { assignAuctionLots, moveAuctionCategory, updateAuctionCategory } from '../../../api/adapters/auction';
+import { assignAuctionLots, assignSuggestedAuctionLots, moveAuctionCategory, updateAuctionCategory } from '../../../api/adapters/auction';
 
 type Run = (f: () => Promise<unknown>) => void;
 const NONE = 'none';
@@ -132,9 +132,16 @@ export default function AuctionLotsAdmin({
                     <h2>
                         Players <span className="text-muted-foreground text-xs font-normal">{lots.filter((l) => !l.categoryId).length} unassigned</span>
                     </h2>
-                    <div className="host-search min-w-52">
-                        <Search size={16} />
-                        <Input aria-label="Search players" placeholder="Search player or number" value={q} onChange={(e) => setQ(e.target.value)} />
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {categoriesOpen && lots.some((l) => !l.categoryId && l.status === 'WAITING' && !l.retained) && (
+                            <Button variant="outline" disabled={busy} onClick={() => run(() => assignSuggestedAuctionLots(eventId))}>
+                                Assign categories from levels
+                            </Button>
+                        )}
+                        <div className="host-search min-w-52">
+                            <Search size={16} />
+                            <Input aria-label="Search players" placeholder="Search player or number" value={q} onChange={(e) => setQ(e.target.value)} />
+                        </div>
                     </div>
                 </div>
                 <div className="auction-lot-tabs" role="group" aria-label="Filter players by lot">
