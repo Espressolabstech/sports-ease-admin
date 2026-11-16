@@ -231,8 +231,8 @@ export default function AuctionAdminPanel({ eventId }: { eventId: string }) {
                 </div>
                 <div className="flex items-center justify-between gap-3 flex-wrap mt-5 pt-5 border-t border-border">
                     <p className="text-muted-foreground text-xs max-w-xl">
-                        Testing done? Reset puts the auction back to the start: every sale, retention and re-auction is cleared and the live screen returns to the
-                        categories. Players stay in the categories they were assigned to, with their levels and the teams and purses unchanged.
+                        Testing done? Reset puts the auction back to the start: every sale, retention and re-auction is cleared, and every player goes back to Self Rated
+                        — host-confirmed levels are dropped and each player returns to the category their own registration answers point to. Teams and purses are unchanged.
                     </p>
                     <Button
                         variant="destructive"
@@ -241,7 +241,7 @@ export default function AuctionAdminPanel({ eventId }: { eventId: string }) {
                             setConfirmation({
                                 title: 'Reset the auction?',
                                 description:
-                                    'All sales, retentions and re-auctions are cleared and every player goes back to waiting in their assigned category. Teams, purses and categories are kept. This cannot be undone.',
+                                    'All sales, retentions and re-auctions are cleared. Every player goes back to Self Rated: host-confirmed levels are removed and categories are set again from what each player chose when registering. Teams and purses are kept. This cannot be undone.',
                                 action: 'Reset auction',
                                 destructive: true,
                                 run: () => resetAuction(eventId),
