@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Download, Plus, RefreshCw, Trash2, Upload } from 'lucide-react';
+import { Download, Plus, RefreshCw, RotateCcw, Trash2, Upload } from 'lucide-react';
 import { rupees, purseError, kindLabel, spentBy, TEAM_PURSE_INR } from '../../../lib/auction';
 import { AnimatedLoader } from '../../../components/AnimatedLoader';
 import {
@@ -23,6 +23,7 @@ import {
     createAuctionCategory,
     setupAuction,
     syncAuctionPlayers,
+    resetAuction,
 } from '../../../api/adapters/auction';
 import { TeamLogo } from './TeamLogo';
 import AuctionLotsAdmin from './AuctionLotsAdmin';
@@ -226,6 +227,28 @@ export default function AuctionAdminPanel({ eventId }: { eventId: string }) {
                         }
                     >
                         <RefreshCw /> Sync registered players
+                    </Button>
+                </div>
+                <div className="flex items-center justify-between gap-3 flex-wrap mt-5 pt-5 border-t border-border">
+                    <p className="text-muted-foreground text-xs max-w-xl">
+                        Testing done? Reset puts the auction back to the start: every sale, retention and re-auction is cleared and the live screen returns to the
+                        categories. Players stay in the categories they were assigned to, with their levels and the teams and purses unchanged.
+                    </p>
+                    <Button
+                        variant="destructive"
+                        disabled={m.isPending}
+                        onClick={() =>
+                            setConfirmation({
+                                title: 'Reset the auction?',
+                                description:
+                                    'All sales, retentions and re-auctions are cleared and every player goes back to waiting in their assigned category. Teams, purses and categories are kept. This cannot be undone.',
+                                action: 'Reset auction',
+                                destructive: true,
+                                run: () => resetAuction(eventId),
+                            })
+                        }
+                    >
+                        <RotateCcw /> Reset auction
                     </Button>
                 </div>
             </section>

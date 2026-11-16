@@ -17,6 +17,8 @@ export const setupAuction = (eventId: string) => wrap(apiClient<null>({ url: bas
 export const syncAuctionPlayers = (eventId: string) =>
     wrap(apiClient<{ added: number; removed: number }>({ url: base(eventId, '/sync-players'), method: 'POST' }));
 
+export const resetAuction = (eventId: string) => wrap(apiClient<null>({ url: base(eventId, '/reset'), method: 'POST' }));
+
 export const createAuctionTeam = (eventId: string, data: { name: string; purseInr: number }) =>
     wrap(apiClient<{ team: ApiAuctionTeam }>({ url: base(eventId, '/teams'), method: 'POST', data }));
 

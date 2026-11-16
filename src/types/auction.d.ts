@@ -46,6 +46,10 @@ declare global {
         pickleballLevel: AuctionSkillLevel | null;
         /** Both levels were saved by the organizer. */
         levelsConfirmed: boolean;
+        levelsConfirmedBy: string | null;
+        levelsConfirmedAt: string | null;
+        registeredPadelLevel: AuctionSkillLevel | null;
+        registeredPickleballLevel: AuctionSkillLevel | null;
         achievements: string | null;
         categoryId: string | null;
         status: AuctionLotStatus;

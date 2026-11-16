@@ -111,3 +111,7 @@
 /* Switching between auction pages must not shift the layout: always reserve the scrollbar's space, and give every page the same content width. */
 html:has(body.pp-console-page) { scrollbar-gutter: stable; }
 .pp-console .auction-main.pv-page { max-width: 1240px; }
+
+/* Tab rows scroll sideways on narrow screens, but never show a scrollbar. */
+.pp-console .auction-nav, .pp-console .host-tabs { overflow-y: hidden; scrollbar-width: none; }
+.pp-console .auction-nav::-webkit-scrollbar, .pp-console .host-tabs::-webkit-scrollbar { display: none; }
