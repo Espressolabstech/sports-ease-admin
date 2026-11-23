@@ -39,3 +39,9 @@ export const getAdminMe = () =>
         url: endpoints.me,
         method: 'GET',
     });
+
+export const updateAdminMe = (name: string) =>
+    apiClient<{ admin: { id: string; name: string; email: string | null } }>({ url: endpoints.me, method: 'PATCH', data: { name } });
+
+export const changeAdminPassword = (currentPassword: string, newPassword: string) =>
+    apiClient<null>({ url: endpoints.mePassword, method: 'POST', data: { currentPassword, newPassword } });

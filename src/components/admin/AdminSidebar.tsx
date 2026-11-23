@@ -74,7 +74,8 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
         ...(can('ledger.view') ? [{ to: '/admin/ledger', icon: BookOpen, label: 'Ledger' }] : []),
         ...(can('players.view') ? [{ to: '/admin/players', icon: Users, label: 'Players' }] : []),
         ...(can('admins.manage') ? [{ to: '/admin/team', icon: ShieldCheck, label: 'Team & Roles' }] : []),
-        ...(can('settings.view') ? [{ to: '/admin/settings', icon: Settings, label: 'Settings' }] : []),
+        // Everyone gets Settings (their own name and password); platform settings inside still need settings.view.
+        { to: '/admin/settings', icon: Settings, label: 'Settings' },
     ];
 
     return (

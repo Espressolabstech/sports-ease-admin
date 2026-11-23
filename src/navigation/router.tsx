@@ -47,7 +47,7 @@ export const router = createBrowserRouter([
             { path: 'ledger', element: <RequirePermission permission="ledger.view"><Ledger /></RequirePermission> },
             { path: 'invitations', element: <RequirePermission permission="invitations.manage"><Invitation /></RequirePermission> },
             { path: 'team', element: <RequirePermission permission="admins.manage"><Team /></RequirePermission> },
-            { path: 'settings', element: <RequirePermission permission="settings.view"><Settings /></RequirePermission> },
+            { path: 'settings', element: <Settings /> },
         ],
     },
     { path: '/', element: <Navigate to="/admin/dashboard" replace /> },

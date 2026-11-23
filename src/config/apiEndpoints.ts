@@ -4,6 +4,7 @@ export const endpoints = {
     verifyOtp: '/admin/verify-otp',
     loginWithPassword: '/admin/login-password',
     me: '/admin/me',
+    mePassword: '/admin/me/password',
 
     // Dashboard
     dashboard: '/admin/dashboard',
@@ -49,6 +50,7 @@ export const endpoints = {
     eventLedger: '/admin/events/ledger',
     eventPayouts: (eventId: string) => `/admin/events/${eventId}/payouts`,
     eventPayoutVoid: (payoutId: string) => `/admin/events/payouts/${payoutId}/void`,
+    eventEntrantRefund: (eventId: string, entrantId: string) => `/admin/events/${eventId}/entrants/${entrantId}/refund`,
     organizers: '/admin/organizers',
     eventHostViewers: (eventId: string) => `/admin/events/${eventId}/host-viewers`,
     eventHostViewer: (eventId: string, viewerId: string) => `/admin/events/${eventId}/host-viewers/${viewerId}`,

@@ -10,7 +10,7 @@ import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { createEventPayout, getEventDetail, voidEventPayout, type EventPayoutRecord } from '../../api/adapters/events';
+import { createEventPayout, getEventDetail, refundEventEntrant, voidEventPayout, type EventEntrantRow, type EventPayoutRecord } from '../../api/adapters/events';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import EventLedger from './EventLedger';
 import HostViewersPanel from './HostViewersPanel';
@@ -41,6 +41,8 @@ export default function AdminEventDetailPage() {
     const [payoutOpen, setPayoutOpen] = useState(false);
     const [voiding, setVoiding] = useState<EventPayoutRecord | null>(null);
     const [voidReason, setVoidReason] = useState('');
+    const [refunding, setRefunding] = useState<EventEntrantRow | null>(null);
+    const [refundForm, setRefundForm] = useState({ amount: '', reason: '' });
     const [form, setForm] = useState({ method: 'Bank transfer', reference: '', notes: '', paidAt: new Date().toISOString().slice(0, 10) });
 
     const { data, isLoading } = useQuery({
@@ -80,6 +82,24 @@ export default function AdminEventDetailPage() {
         },
         onError: (err: any) => toast.error(err.message || 'Could not void payout'),
     });
+
+    const refundMutation = useMutation({
+        mutationFn: () => refundEventEntrant(eventId!, refunding!.id, { amount: Number(refundForm.amount), reason: refundForm.reason.trim() || undefined }),
+        onSuccess: (res) => {
+            const amount = res?.amount ?? Number(refundForm.amount);
+            toast.success(`Refund of ${inr(amount, { decimals: true })} started for ${refunding?.name}. Razorpay sends it to their account in 5–7 working days.`);
+            setRefunding(null);
+            refresh();
+        },
+        onError: (err: { message?: string }) => {
+            toast.error(err.message || 'Could not refund');
+            refresh();
+        },
+    });
+    const openRefund = (p: EventEntrantRow) => {
+        setRefundForm({ amount: String(data?.event.priceInr ?? ''), reason: '' });
+        setRefunding(p);
+    };
 
     if (isLoading) {
         return (
@@ -237,8 +257,8 @@ export default function AdminEventDetailPage() {
                                 <table className="w-full text-sm">
                                     <thead>
                                         <tr className="border-b border-border text-left">
-                                            {['Player', 'Phone', 'Status', 'Payment', 'Source', 'Registered', 'Razorpay order'].map((h) => (
-                                                <th key={h} className="whitespace-nowrap px-4 py-3 font-medium text-muted-foreground">{h}</th>
+                                            {['Player', 'Phone', 'Status', 'Payment', 'Source', 'Registered', 'Razorpay order', ...(can('events.payouts') ? [''] : [])].map((h, i) => (
+                                                <th key={i} className="whitespace-nowrap px-4 py-3 font-medium text-muted-foreground">{h}</th>
                                             ))}
                                         </tr>
                                     </thead>
@@ -248,7 +268,9 @@ export default function AdminEventDetailPage() {
                                                 <td className="px-4 py-3 font-medium">{p.name}</td>
                                                 <td className="px-4 py-3 text-muted-foreground">{p.phone ?? '—'}</td>
                                                 <td className="px-4 py-3">
-                                                    {p.waitlisted ? (
+                                                    {p.paymentMethod === 'REFUNDED' ? (
+                                                        <StatusBadge status="Cancelled" variant="red" />
+                                                    ) : p.waitlisted ? (
                                                         <StatusBadge status={`Waitlist #${p.waitlistPosition}`} variant="amber" />
                                                     ) : p.checkedIn ? (
                                                         <StatusBadge status="Checked in" variant="lime" />
@@ -257,7 +279,19 @@ export default function AdminEventDetailPage() {
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    {p.paymentMethod === 'ONLINE' ? (
+                                                    {p.paymentMethod === 'REFUNDED' ? (
+                                                        <div>
+                                                            <StatusBadge status={p.refund ? `Refunded ${inr(p.refund.amount, { decimals: true })}` : 'Refunded'} variant="red" />
+                                                            {p.refund && (
+                                                                <div className="mt-1 text-xs text-muted-foreground">
+                                                                    {fmtDateTime(p.refund.at)}
+                                                                    {p.refund.refundId && <span className="ml-1 font-mono">· {p.refund.refundId}</span>}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ) : p.paymentMethod === 'REFUNDING' ? (
+                                                        <StatusBadge status="Refund in progress" variant="amber" />
+                                                    ) : p.paymentMethod === 'ONLINE' ? (
                                                         <StatusBadge status="Paid online" variant="lime" />
                                                     ) : p.paymentMethod === 'OFFLINE' ? (
                                                         <StatusBadge status="Paid direct" variant="blue" />
@@ -291,6 +325,15 @@ export default function AdminEventDetailPage() {
                                                 <td className="px-4 py-3 text-muted-foreground">{p.source === 'WALK_IN' ? 'Walk-in' : 'Online signup'}</td>
                                                 <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{fmtDateTime(p.registeredAt)}</td>
                                                 <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.razorpayOrderId ?? '—'}</td>
+                                                {can('events.payouts') && (
+                                                    <td className="px-4 py-3 text-right">
+                                                        {p.canRefund && (
+                                                            <Button size="sm" variant="outline" onClick={() => openRefund(p)}>
+                                                                Refund
+                                                            </Button>
+                                                        )}
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))}
                                     </tbody>
@@ -315,6 +358,7 @@ export default function AdminEventDetailPage() {
                             <Row label="Confirmed but unpaid" value={stats.unpaid} />
                             <Row label="Waitlisted" value={stats.waitlisted} />
                             <Row label="Paid online but waitlisted" value={stats.paidWaitlisted} strong={stats.paidWaitlisted > 0} />
+                            <Row label="Refunded (not counted above)" value={stats.refunded ?? 0} />
                         </div>
                         <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
                             Only online payments flow through the platform, so only those carry the platform fee, gateway fee and GST. Cash and
@@ -422,6 +466,55 @@ export default function AdminEventDetailPage() {
                         <Button variant="outline" onClick={() => setPayoutOpen(false)}>Cancel</Button>
                         <Button className={lime} disabled={payoutMutation.isPending} onClick={() => payoutMutation.mutate()}>
                             Confirm — payout done
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!refunding} onOpenChange={(o) => !o && !refundMutation.isPending && setRefunding(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Refund {refunding?.name}?</DialogTitle>
+                        <DialogDescription>
+                            The money goes back to the card / UPI they paid with, through Razorpay (5–7 working days). Their registration is cancelled: the
+                            spot frees up, they leave the auction pool, and the host isn't paid for them. This can't be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <label className="block space-y-1.5">
+                            <span className="text-sm font-medium">Amount to refund (₹)</span>
+                            <Input
+                                type="number"
+                                inputMode="decimal"
+                                min={1}
+                                max={event.priceInr}
+                                value={refundForm.amount}
+                                onChange={(e) => setRefundForm((f) => ({ ...f, amount: e.target.value }))}
+                            />
+                            <span className="block text-xs text-muted-foreground">
+                                Entry fee {inr(event.priceInr)}. Lower it to keep a cancellation charge. Razorpay keeps its gateway fee either way.
+                            </span>
+                        </label>
+                        <Textarea
+                            placeholder="Reason (optional, saved in the ledger)"
+                            value={refundForm.reason}
+                            onChange={(e) => setRefundForm((f) => ({ ...f, reason: e.target.value }))}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" disabled={refundMutation.isPending} onClick={() => setRefunding(null)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={
+                                refundMutation.isPending ||
+                                !(Number(refundForm.amount) >= 1) ||
+                                Number(refundForm.amount) > event.priceInr
+                            }
+                            onClick={() => refundMutation.mutate()}
+                        >
+                            {refundMutation.isPending ? 'Refunding…' : `Refund ${inr(Number(refundForm.amount) || 0)}`}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

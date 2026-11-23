@@ -21,6 +21,8 @@ interface AdminAuthContextValue {
     can: (permission: AdminPermission) => boolean;
     isLoading: boolean;
     setAdminFromToken: (token: string, admin: AdminUser) => void;
+    /** After the admin edits their own profile (e.g. name in Settings). */
+    updateAdminUser: (patch: Partial<AdminUser>) => void;
     logout: () => void;
 }
 
@@ -65,6 +67,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
                 can: (permission) => Boolean(adminUser?.permissions?.includes(permission)),
                 isLoading,
                 setAdminFromToken,
+                updateAdminUser: (patch) => setAdminUser((a) => (a ? { ...a, ...patch } : a)),
                 logout,
             }}
         >

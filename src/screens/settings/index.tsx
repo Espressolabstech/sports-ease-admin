@@ -8,22 +8,26 @@ import { toast } from 'sonner';
 import { Lock, Settings, Shield, Check } from 'lucide-react';
 import { getTierBenefits, updateTierBenefit, getPlatformStats } from '../../api/adapters/settings';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
+import AccountSettings from './AccountSettings';
 
 
 export default function AdminSettingsPage() {
     const { can } = useAdminAuth();
 
-    if (!can('settings.view')) {
-        return (
-            <div className="flex flex-col items-center justify-center rounded-xl bg-card py-20 shadow-sm">
-                <Lock className="h-12 w-12 text-muted-foreground/30" />
-                <h2 className="mt-4 text-lg font-semibold text-foreground">Restricted Access</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Contact a Super Admin to modify platform settings.</p>
-            </div>
-        );
-    }
-
-    return <SettingsContent />;
+    return (
+        <div className="space-y-8">
+            <AccountSettings />
+            {can('settings.view') ? (
+                <SettingsContent />
+            ) : (
+                <div className="flex max-w-3xl flex-col items-center justify-center rounded-xl bg-card py-12 shadow-sm">
+                    <Lock className="h-10 w-10 text-muted-foreground/30" />
+                    <h2 className="mt-3 text-base font-semibold text-foreground">Platform settings are restricted</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">Contact a Super Admin to modify platform settings.</p>
+                </div>
+            )}
+        </div>
+    );
 }
 
 function SettingsContent() {

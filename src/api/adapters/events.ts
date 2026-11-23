@@ -11,6 +11,8 @@ export interface EntrantStats {
     paidOffline: number;
     unpaid: number;
     paidWaitlisted: number;
+    /** Refunded players — left out of every other count. */
+    refunded: number;
 }
 
 export interface Financials {
@@ -146,8 +148,12 @@ export interface EventEntrantRow {
     waitlisted: boolean;
     waitlistPosition: number | null;
     source: 'REGISTRATION' | 'WALK_IN';
-    paymentMethod: 'ONLINE' | 'OFFLINE' | 'NONE';
+    paymentMethod: 'ONLINE' | 'OFFLINE' | 'NONE' | 'REFUNDED' | 'REFUNDING';
     razorpayOrderId: string | null;
+    /** Set for refunded players when the refund was made from this dashboard. */
+    refund: { amount: number; refundId: string | null; at: string } | null;
+    /** Paid online through PlayPass and not refunded yet. */
+    canRefund: boolean;
     registeredAt: string;
     needsAttention: boolean;
     /**
@@ -287,6 +293,10 @@ export const createEventPayout = (
 
 export const voidEventPayout = (payoutId: string, reason: string) =>
     apiClient<{ payout: EventPayoutRecord }>({ url: endpoints.eventPayoutVoid(payoutId), method: 'POST', data: { reason } });
+
+/** Refunds the player's online fee through Razorpay and cancels their registration. */
+export const refundEventEntrant = (eventId: string, entrantId: string, data: { amount: number; reason?: string }) =>
+    apiClient<{ refundId: string; amount: number }>({ url: endpoints.eventEntrantRefund(eventId, entrantId), method: 'POST', data });
 
 export interface OrganizerOption {
     id: string;
