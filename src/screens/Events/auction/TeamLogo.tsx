@@ -1,8 +1,9 @@
 import { initials } from '../../../lib/auction';
+import { VariantImg } from '../../../components/VariantImg';
 
 export function TeamLogo({ name, logoUrl, size = 28 }: { name: string; logoUrl: string | null; size?: number }) {
     const style = { width: size, height: size, fontSize: size * 0.36 };
-    if (logoUrl) return <img src={logoUrl} alt="" className="rounded-full object-cover shrink-0" style={style} />;
+    if (logoUrl) return <VariantImg src={logoUrl} size="thumb" alt="" className="rounded-full object-cover shrink-0" style={style} />;
     return (
         <span
             aria-hidden="true"

@@ -9,6 +9,7 @@ import { Lock, Settings, Shield, Check } from 'lucide-react';
 import { getTierBenefits, updateTierBenefit, getPlatformStats } from '../../api/adapters/settings';
 import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import AccountSettings from './AccountSettings';
+import ImageBackfill from './ImageBackfill';
 
 
 export default function AdminSettingsPage() {
@@ -17,6 +18,7 @@ export default function AdminSettingsPage() {
     return (
         <div className="space-y-8">
             <AccountSettings />
+            {can('settings.manage') && <div className="max-w-3xl"><ImageBackfill /></div>}
             {can('settings.view') ? (
                 <SettingsContent />
             ) : (

@@ -7,6 +7,7 @@ import { getEventHostDetail } from '../../api/adapters/events';
 import { FinancialBreakdown, PayoutBadge, StatCard } from './shared';
 import EventLedger from './EventLedger';
 import { fillLabel, fmtDate, fmtDateTime, inr } from './format';
+import { VariantImg } from '../../components/VariantImg';
 
 export default function AdminEventHostDetailPage() {
     const { hostId } = useParams();
@@ -41,7 +42,7 @@ export default function AdminEventHostDetailPage() {
                 </Link>
                 <div className="mt-3 flex flex-wrap items-start gap-4">
                     {host.profile?.photoUrl ? (
-                        <img src={host.profile.photoUrl} alt={host.name} className="h-14 w-14 rounded-full object-cover" />
+                        <VariantImg src={host.profile.photoUrl} size="thumb" alt={host.name} className="h-14 w-14 rounded-full object-cover" />
                     ) : (
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--admin-lime))]/20 text-lg font-semibold text-[hsl(var(--admin-lime))]">
                             {host.name.slice(0, 1).toUpperCase()}
