@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Lock, LockOpen, RotateCcw, Search } from 'lucide-react';
+import { AlertTriangle, Download, Lock, LockOpen, RotateCcw, Search } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
@@ -11,6 +11,7 @@ import { cn } from '../../utils/twMerge';
 import {
     getLeagueLedger,
     getLeagueLocks,
+    resetLeague,
     setLeagueLock,
     type LeagueLedgerEntry,
     type LeagueLockSide,
@@ -28,18 +29,106 @@ const ist = (iso: string) =>
 
 /** Court Collective league failsafes for one event: per-team round locks, and the change ledger. */
 export default function LeagueAdminPanel({ eventId, canManage }: { eventId: string; canManage: boolean }) {
-    const [view, setView] = useState<'locks' | 'ledger'>('locks');
+    const [view, setView] = useState<'locks' | 'ledger' | 'reset'>('locks');
     return (
         <div className="space-y-4">
             <PillTabs
                 tabs={[
                     { key: 'locks', label: 'Round locks' },
                     { key: 'ledger', label: 'Change ledger' },
+                    ...(canManage ? [{ key: 'reset' as const, label: 'Reset' }] : []),
                 ]}
                 value={view}
                 onChange={setView}
             />
-            {view === 'locks' ? <RoundLocks eventId={eventId} canManage={canManage} /> : <ChangeLedger eventId={eventId} />}
+            {view === 'locks' && <RoundLocks eventId={eventId} canManage={canManage} />}
+            {view === 'ledger' && <ChangeLedger eventId={eventId} />}
+            {view === 'reset' && canManage && <ResetLeague eventId={eventId} />}
+        </div>
+    );
+}
+
+// ───────────── Reset ─────────────
+
+const RESETS = {
+    scoring: {
+        title: 'Reset scoring',
+        body: 'Clears every score, line-up, lock (and admin override), round deadline, Round 4–Final pairing and draw. Teams, groups and team logins stay, so the league starts again from Round 1.',
+        action: 'Reset scoring',
+    },
+    everything: {
+        title: 'Reset everything',
+        body: 'Removes the whole league for this event, including teams, groups and team logins. The organiser sets it up again from Scoring.',
+        action: 'Reset everything',
+    },
+} as const;
+
+function ResetLeague({ eventId }: { eventId: string }) {
+    const qc = useQueryClient();
+    const [mode, setMode] = useState<keyof typeof RESETS | null>(null);
+    const [typed, setTyped] = useState('');
+    const [clearLedger, setClearLedger] = useState(false);
+    const mutation = useMutation({
+        mutationFn: () => resetLeague(eventId, { mode: mode!, clearLedger, confirm: typed.trim() }),
+        onSuccess: () => {
+            toast.success(mode === 'scoring' ? 'Scoring reset. Every screen updates now.' : 'League reset. The organiser can set it up again.');
+            void qc.invalidateQueries({ queryKey: ['admin-league-locks', eventId] });
+            void qc.invalidateQueries({ queryKey: ['admin-league-ledger', eventId] });
+            setMode(null);
+        },
+        onError: (e) => toast.error(errorText(e)),
+    });
+    const open = (m: keyof typeof RESETS) => {
+        setTyped('');
+        setClearLedger(false);
+        setMode(m);
+    };
+    return (
+        <div className="space-y-4">
+            <div className="flex items-start gap-3 rounded-xl border border-[hsl(var(--admin-status-red))]/40 bg-card p-4 text-sm shadow-sm">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--admin-status-red))]" />
+                <p className="text-muted-foreground">
+                    For testing on the live site. This can't be undone. The auction (squads, prices, teams) is never touched, and the reset is recorded in the change ledger.
+                </p>
+            </div>
+            {(Object.keys(RESETS) as (keyof typeof RESETS)[]).map((m) => (
+                <div key={m} className="flex flex-wrap items-center gap-4 rounded-xl bg-card p-5 shadow-sm">
+                    <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-semibold">{RESETS[m].title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{RESETS[m].body}</p>
+                    </div>
+                    <Button variant="destructive" onClick={() => open(m)}>
+                        {RESETS[m].action}
+                    </Button>
+                </div>
+            ))}
+
+            <Dialog open={!!mode} onOpenChange={(o) => !o && !mutation.isPending && setMode(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{mode && RESETS[mode].title}?</DialogTitle>
+                        <DialogDescription>{mode && RESETS[mode].body} This can't be undone.</DialogDescription>
+                    </DialogHeader>
+                    <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" checked={clearLedger} onChange={(e) => setClearLedger(e.target.checked)} />
+                        Also clear the change ledger (earlier history)
+                    </label>
+                    <div className="space-y-1.5">
+                        <p className="text-sm text-muted-foreground">
+                            Type <b className="text-foreground">RESET</b> to confirm.
+                        </p>
+                        <Input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="RESET" autoComplete="off" />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" disabled={mutation.isPending} onClick={() => setMode(null)}>
+                            Cancel
+                        </Button>
+                        <Button variant="destructive" disabled={mutation.isPending || typed.trim() !== 'RESET'} onClick={() => mutation.mutate()}>
+                            {mutation.isPending ? 'Resetting…' : mode && RESETS[mode].action}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
@@ -224,6 +313,7 @@ const KIND_LABEL: Record<string, { label: string; cls: string }> = {
     login: { label: 'Team access', cls: 'bg-muted text-muted-foreground' },
     setup: { label: 'Setup', cls: 'bg-muted text-muted-foreground' },
     testing: { label: 'Testing', cls: 'bg-muted text-muted-foreground' },
+    reset: { label: 'Reset', cls: 'bg-[hsl(var(--admin-status-red))]/15 text-[hsl(var(--admin-status-red))]' },
 };
 const kindOf = (k: string) => KIND_LABEL[k] ?? { label: k, cls: 'bg-muted text-muted-foreground' };
 const WHO: Record<LeagueLedgerEntry['by']['kind'], string> = { organiser: 'Organisers', team: 'Teams', admin: 'PlayPass admins', system: 'Automatic' };

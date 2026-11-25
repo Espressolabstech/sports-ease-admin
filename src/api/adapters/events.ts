@@ -332,6 +332,8 @@ export interface LeagueLedgerEntry {
 export const getLeagueLocks = (eventId: string) => apiClient<LeagueLocksView>({ url: endpoints.eventLeagueLocks(eventId), method: 'GET' });
 export const setLeagueLock = (eventId: string, data: { tie: number; slot: number; state: LeagueLockState }) =>
     apiClient<LeagueLocksView>({ url: endpoints.eventLeagueLocks(eventId), method: 'PUT', data });
+export const resetLeague = (eventId: string, data: { mode: 'scoring' | 'everything'; clearLedger: boolean; confirm: string }) =>
+    apiClient<{ ok: boolean }>({ url: endpoints.eventLeagueReset(eventId), method: 'POST', data });
 export const getLeagueLedger = (eventId: string, params: { kind?: string; before?: string; limit?: number }) =>
     apiClient<{ entries: LeagueLedgerEntry[]; next: string | null; kinds: { kind: string; count: number }[] }>({
         url: endpoints.eventLeagueLog(eventId),

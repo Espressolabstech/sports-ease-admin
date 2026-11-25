@@ -53,6 +53,7 @@ export const endpoints = {
     eventEntrantRefund: (eventId: string, entrantId: string) => `/admin/events/${eventId}/entrants/${entrantId}/refund`,
     eventLeagueLocks: (eventId: string) => `/admin/events/${eventId}/league/locks`,
     eventLeagueLog: (eventId: string) => `/admin/events/${eventId}/league/log`,
+    eventLeagueReset: (eventId: string) => `/admin/events/${eventId}/league/reset`,
     organizers: '/admin/organizers',
     eventHostViewers: (eventId: string) => `/admin/events/${eventId}/host-viewers`,
     eventHostViewer: (eventId: string, viewerId: string) => `/admin/events/${eventId}/host-viewers/${viewerId}`,
