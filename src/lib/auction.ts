@@ -101,6 +101,7 @@ export const KIND_LABELS: Record<string, string> = {
     reset: 'Auction reset',
     retain: 'Player retained',
     unretain: 'Retention removed',
+    replace: 'Player replaced',
     purse: 'Purse changed',
     team_added: 'Team added',
     team_renamed: 'Team renamed',

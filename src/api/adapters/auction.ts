@@ -66,5 +66,9 @@ export const assignSuggestedAuctionLots = (eventId: string) =>
 export const retainAuctionPlayer = (eventId: string, lotId: string, teamId: string) =>
     wrap(apiClient<null>({ url: base(eventId, '/retain'), method: 'POST', data: { lotId, teamId } }));
 
+/** Substitution after the auction: a player not in a team replaces `outLotId`'s player; a player in another team swaps. */
+export const replaceAuctionPlayer = (eventId: string, data: { outLotId: string; inLotId: string; priceInr: number | null; reason: string | null }) =>
+    apiClient<{ summary: string; swap: boolean; price: number | null; lineupsChanged: number; league: boolean }>({ url: base(eventId, '/replace'), method: 'POST', data });
+
 export const unretainAuctionPlayer = (eventId: string, lotId: string) =>
     wrap(apiClient<null>({ url: base(eventId, '/unretain'), method: 'POST', data: { lotId } }));

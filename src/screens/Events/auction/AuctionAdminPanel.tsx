@@ -27,6 +27,7 @@ import {
 } from '../../../api/adapters/auction';
 import { TeamLogo } from './TeamLogo';
 import AuctionLotsAdmin from './AuctionLotsAdmin';
+import ReplacePlayers from './ReplacePlayers';
 import AuctionConfirmDialog, { type AuctionConfirmation } from './AuctionConfirmDialog';
 import './registration-identical.css';
 
@@ -306,6 +307,8 @@ export default function AuctionAdminPanel({ eventId }: { eventId: string }) {
                     New teams start with a {rupees(TEAM_PURSE_INR)} purse. A team that has bought players can’t be removed.
                 </p>
             </section>
+
+            <ReplacePlayers eventId={eventId} teams={teams} lots={lots} />
 
             <section className="auction-panel mb-8">
                 <h2>Add category</h2>

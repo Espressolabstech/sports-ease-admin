@@ -313,6 +313,7 @@ const KIND_LABEL: Record<string, { label: string; cls: string }> = {
     login: { label: 'Team access', cls: 'bg-muted text-muted-foreground' },
     setup: { label: 'Setup', cls: 'bg-muted text-muted-foreground' },
     testing: { label: 'Testing', cls: 'bg-muted text-muted-foreground' },
+    'squad change': { label: 'Squad change', cls: 'bg-[hsl(var(--admin-status-amber))]/15 text-[hsl(var(--admin-status-amber))]' },
     reset: { label: 'Reset', cls: 'bg-[hsl(var(--admin-status-red))]/15 text-[hsl(var(--admin-status-red))]' },
 };
 const kindOf = (k: string) => KIND_LABEL[k] ?? { label: k, cls: 'bg-muted text-muted-foreground' };
