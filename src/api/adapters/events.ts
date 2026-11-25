@@ -298,6 +298,47 @@ export const voidEventPayout = (payoutId: string, reason: string) =>
 export const refundEventEntrant = (eventId: string, entrantId: string, data: { amount: number; reason?: string }) =>
     apiClient<{ refundId: string; amount: number }>({ url: endpoints.eventEntrantRefund(eventId, entrantId), method: 'POST', data });
 
+// ───── Court Collective league: per-team round locks + change ledger ─────
+export type LeagueLockState = 'locked' | 'unlocked' | 'auto';
+export interface LeagueLockSide {
+    slot: number;
+    code: string;
+    name: string;
+    logoUrl: string | null;
+    locked: boolean;
+    lockedByDeadline: boolean;
+    override: 'locked' | 'unlocked' | null;
+    confirmed: boolean;
+    changedAfterLock: boolean;
+}
+export interface LeagueLocksView {
+    setUp?: boolean;
+    now?: string;
+    rounds: { key: string; label: string; lockAt: string | null; ties: { number: number; lockedAt: string | null; sides: (LeagueLockSide | null)[] }[] }[];
+}
+export interface LeagueLedgerEntry {
+    id: string;
+    at: string;
+    kind: string;
+    who: string;
+    by: { kind: 'organiser' | 'admin' | 'team' | 'system'; name: string; phone: string | null; role: string | null };
+    tie: number | null;
+    round: string | null;
+    team: { slot: number; code: string; name: string } | null;
+    changes: string[];
+    warnings: string[];
+}
+
+export const getLeagueLocks = (eventId: string) => apiClient<LeagueLocksView>({ url: endpoints.eventLeagueLocks(eventId), method: 'GET' });
+export const setLeagueLock = (eventId: string, data: { tie: number; slot: number; state: LeagueLockState }) =>
+    apiClient<LeagueLocksView>({ url: endpoints.eventLeagueLocks(eventId), method: 'PUT', data });
+export const getLeagueLedger = (eventId: string, params: { kind?: string; before?: string; limit?: number }) =>
+    apiClient<{ entries: LeagueLedgerEntry[]; next: string | null; kinds: { kind: string; count: number }[] }>({
+        url: endpoints.eventLeagueLog(eventId),
+        method: 'GET',
+        params,
+    });
+
 export interface OrganizerOption {
     id: string;
     name: string | null;

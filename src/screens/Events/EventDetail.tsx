@@ -15,10 +15,11 @@ import { useAdminAuth } from '../../contexts/AdminAuthContext';
 import EventLedger from './EventLedger';
 import HostViewersPanel from './HostViewersPanel';
 import AuctionAdminPanel from './auction/AuctionAdminPanel';
+import LeagueAdminPanel from './LeagueAdminPanel';
 import { FinancialBreakdown, PayoutBadge, PillTabs, Row, StatCard } from './shared';
 import { fmtDate, fmtDateTime, inr } from './format';
 
-type Tab = 'overview' | 'players' | 'financials' | 'payouts' | 'ledger' | 'auction';
+type Tab = 'overview' | 'players' | 'financials' | 'payouts' | 'ledger' | 'auction' | 'league';
 
 const PAYOUT_METHODS = ['Bank transfer', 'UPI', 'Cash', 'Other'];
 const lime = 'bg-[hsl(var(--admin-lime))] text-[hsl(var(--admin-lime-foreground))] hover:bg-[hsl(var(--admin-lime))]/90';
@@ -193,6 +194,7 @@ export default function AdminEventDetailPage() {
                     { key: 'payouts', label: 'Host payout' },
                     { key: 'ledger', label: 'Ledger' },
                     ...(can('events.manage') ? [{ key: 'auction' as const, label: 'Auction' }] : []),
+                    { key: 'league' as const, label: 'League' },
                 ]}
                 value={tab}
                 onChange={(t) => setParams({ tab: t })}
@@ -441,6 +443,7 @@ export default function AdminEventDetailPage() {
             {tab === 'ledger' && <EventLedger eventId={event.id} />}
 
             {tab === 'auction' && can('events.manage') && <AuctionAdminPanel eventId={event.id} />}
+            {tab === 'league' && <LeagueAdminPanel eventId={event.id} canManage={can('events.manage')} />}
 
             <Dialog open={payoutOpen} onOpenChange={setPayoutOpen}>
                 <DialogContent>
